@@ -1,0 +1,17 @@
+[project]
+name = "marimolib"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "FumiHubCNS", email = "fendo@cns.s.u-tokyo.ac.jp" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "marimo>=0.17.7",
+    "plotly>=6.4.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
