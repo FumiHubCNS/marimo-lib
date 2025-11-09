@@ -7,7 +7,7 @@ app = marimo.App(width="medium", layout_file="layouts/demo.slides.json")
 @app.cell
 def _():
     import marimo as mo
-    import marimolib as molib
+    import marimo_lib as molib
     from plotly.subplots import make_subplots
 
     import random
@@ -166,11 +166,6 @@ def _(GLOBAL_FIG_WIDTH: int, fig, make_subplots, mo, molib):
         mo.md("→" + " " + "y[0:5]:" + " " + str(molib.plot.decode_typed_arrays(_output_valu['y'])[0:5])),
         _fig.update_layout(height=300, width=GLOBAL_FIG_WIDTH, showlegend=False, title_text="")
     ])
-    return
-
-
-@app.cell
-def _():
     return
 
 
