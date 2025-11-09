@@ -170,6 +170,161 @@ def _(GLOBAL_FIG_WIDTH: int, fig, make_subplots, mo, molib):
 
 
 @app.cell
+def _(make_subplots):
+    import plotly.graph_objects as go
+    import pandas as pd
+    import datetime as dt
+    # from plotly.subplots import make_subplots
+    # import numpy as np
+
+
+    # df = pd.DataFrame([
+    #     {"task": "Task D", "start": "2025-01-01", "finish": "2025-01-05", "group": "Line 2"},
+    #     {"task": "Task A", "start": "2025-01-07", "finish": "2025-01-10", "group": "Line 1"},
+    #     {"task": "Task B", "start": "2025-01-03", "finish": "2025-01-08", "group": "Line 1"},
+    #     {"task": "Task C", "start": "2025-01-02", "finish": "2025-01-06", "group": "Line 2"},
+    #     {"task": "Task D", "start": "2025-01-09", "finish": "2025-01-10", "group": "Line 2"},
+    # ])
+
+    # df["start"]  = pd.to_datetime(df["start"])
+    # df["finish"] = pd.to_datetime(df["finish"])
+
+    # df["duration_days"] = (df["finish"] - df["start"]).dt.total_seconds() / 86400.0
+
+    df = pd.DataFrame([
+        {"task": "Task D", "start": "2025-01-01", "finish": "2025-01-05", "group": "Line 2"},
+        {"task": "Task A", "start": "2025-01-07", "finish": "2025-01-10", "group": "Line 1"},
+        {"task": "Task B", "start": "2025-01-03", "finish": "2025-01-08", "group": "Line 1"},
+        {"task": "Task C", "start": "2025-01-02", "finish": "2025-01-06", "group": "Line 2"},
+        {"task": "Task E", "start": "2025-01-09", "finish": "2025-01-10", "group": "Line 2"},
+    ])
+
+    df["start"]  = pd.to_datetime(df["start"])
+    df["finish"] = pd.to_datetime(df["finish"])
+    df["duration_days"] = (df["finish"] - df["start"]).dt.total_seconds() / 86400.0
+
+
+    _fig = make_subplots(
+        rows=1, cols=1,
+        shared_xaxes=True,
+        vertical_spacing=0.05,
+        subplot_titles=("Line 1", "Line 2"),
+    )
+
+    _i = 0
+
+    _fig.add_trace(
+        go.Bar(
+            # ★ x は「終了日時」
+            x=[df["finish"][_i]],
+            base=[df["start"][_i]],
+            y=[df["task"][_i]],
+            orientation="h"
+        ),
+        row=1, col=1,
+    )
+
+    _i = 4
+
+    _fig.add_trace(
+        go.Bar(
+            # ★ x は「終了日時」
+            x=[df["finish"][_i]],
+            base=[df["start"][_i]],
+            y=[df["task"][_i]],
+            orientation="h"
+        ),
+        row=1, col=1,
+    )
+
+    # for row, grp in enumerate(["Line 1", "Line 2"], start=1):
+    #     sub = df[df["group"] == grp]
+
+    #     _fig.add_trace(
+    #         go.Bar(
+    #             # ★ x は「終了日時」
+    #             x=sub["finish"],
+    #             # ★ base は「開始日時」
+    #             base=sub["start"],
+    #             y=sub["task"],
+    #             orientation="h",
+    #             text=[f"{s.date()} → {f.date()} ({d:.1f} d)"
+    #                   for s, f, d in zip(sub["start"], sub["finish"], sub["duration_days"])],
+    #             hovertemplate=(
+    #                 "Task: %{y}<br>"
+    #                 "Start: %{base}<br>"
+    #                 "Finish: %{x}<br>"
+    #                 "Duration: %{text}<extra></extra>"
+    #             ),
+    #         ),
+    #         row=1, col=1,
+    #     )
+
+    # for task, sub in df.groupby("task"):
+    #     _fig.add_trace(
+    #         go.Bar(
+    #             x=sub["finish"],
+    #             base=sub["start"],
+    #             y=[task] * len(sub),  # 同じ task 名を繰り返す
+    #             orientation="h",
+    #             name=task,
+    #         )
+    #     )
+
+    _fig.update_xaxes(type="date", row=1, col=1)
+    _fig.update_xaxes(type="date", row=2, col=1)
+
+
+    xmin = df["start"].min() - pd.Timedelta(days=1)
+    xmax = df["finish"].max() + pd.Timedelta(days=1)
+
+    _fig.update_xaxes(range=[xmin, xmax], row=1, col=1)
+    _fig.update_xaxes(range=[xmin, xmax], row=2, col=1)
+
+    _fig.update_layout(
+        barmode="overlay",
+        showlegend=False,
+    )
+
+    _fig.update_xaxes(
+        showgrid=True,
+        gridwidth=1,
+        griddash="dot",  # 破線にしたいとき（plotly>=5系なら使える）
+        row=1, col=1
+    )
+
+
+
+
+    deadline = dt.datetime(2025, 1, 6)
+
+    _fig.add_vline(
+        x=deadline,
+        line=dict(color="red", width=2, dash="dot"),
+        row=1, col=1
+    )
+
+
+
+    # _fig.add_annotation(
+    #     x=deadline,
+    #     y=1.05,  # 軸外（1よりちょい上）に出したい場合 → yref="paper" と併用
+    #     xref="x",       # x は第1サブプロットの x軸、という意味
+    #     yref="paper",   # 図全体の縦方向 0〜1
+    #     text="Deadline",
+    #     showarrow=True,
+    #     arrowhead=2,
+    #     ax=0,
+    #     ay=-30,         # 矢印の向き
+    #     font=dict(color="red"),
+    #     row=1, col=1,
+    # )
+
+    _fig.show()
+    return
+
+
+@app.cell
 def _():
     return
 
