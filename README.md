@@ -3,6 +3,6 @@
 ## ライブラリとして使う時の使い方
 
 ```shell
-uv add marimo-lib @ git+https://github.com/FumiHubCNS/marimo-lib
+uv add "marimo-lib @ git+https://github.com/FumiHubCNS/marimo-lib"
 ```
 
