@@ -10,8 +10,9 @@ def get_image_html(
     alt_name: str = "サンプル画像",
     *,
     mode: Literal["data_url", "file_src"] = "data_url",
-    width: Optional[str] = None,   # 例: "550px", "50%", None
+    width: Optional[str] = None,
     rounded: bool = False,
+    round_radius: Optional[str] = '10%',  
 ) -> str:
     """
     mode="data_url"  : <img src="data:image/png;base64,..."> を返す（従来どおり）
@@ -35,7 +36,7 @@ def get_image_html(
         if width is not None:
             style_parts.append(f"width:{width}")
         if rounded:
-            style_parts.append("border-radius:9999px")  # ほぼ丸 / pill 形
+            style_parts.append("border-radius:{round_radius}")  # ほぼ丸 / pill 形
 
         style_attr = "; ".join(style_parts)
 
@@ -107,7 +108,6 @@ def get_video_html(
 
     attrs = " ".join(attr_list)
 
-    # <video>+<source> 形式にしておくと拡張しやすい
     html_text = (
         f'<video {attrs} style="{style_attr}">'
         f'<source src="{src_attr}" type="video/mp4" />'
