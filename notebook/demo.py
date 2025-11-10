@@ -9,7 +9,7 @@ app = marimo.App(
 
 with app.setup:
     # Initialization code that runs before all other cells
-    import marimo_lib as molib
+    import marimo_lib.util as molib
     from plotly.subplots import make_subplots
     import random
     import numpy as np
