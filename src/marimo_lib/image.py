@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pathlib import Path
 import base64
 from PIL import Image
@@ -115,3 +116,48 @@ def get_video_html(
         "</video>"
     )
     return html_text
+
+
+def get_plotly_iframe_html(
+    html_text: str,
+    *,
+    width: str = "1290px",
+    height: str = "515px",
+    mode: Literal["srcdoc", "data_url"] = "data_url",
+) -> str:
+    """
+    Plotly が埋め込まれた HTML 文字列を <iframe> に包んで返す。
+
+    mode="data_url":
+        <iframe src="data:text/html;base64,..."> 形式。
+        生成された HTML ファイル 1 個で完結させたい場合に使う。
+
+    mode="srcdoc":
+        <iframe srcdoc="..."> 形式。
+        こちらも外部ファイルには依存しないが、
+        HTML 内にエスケープした中身を直接埋め込む。
+    """
+
+    if mode == "data_url":
+        # HTML 全体を base64 にして data URL にする
+        b64 = base64.b64encode(html_text.encode("utf-8")).decode("ascii")
+        src = f"data:text/html;base64,{b64}"
+        iframe = (
+            f'<iframe src="{src}" '
+            f'width="{width}" height="{height}" '
+            f'style="border:none;"></iframe>'
+        )
+        return iframe
+
+    elif mode == "srcdoc":
+        # srcdoc 用に HTML を属性値としてエスケープ
+        srcdoc = html.escape(html_text, quote=True)
+        iframe = (
+            f'<iframe srcdoc="{srcdoc}" '
+            f'width="{width}" height="{height}" '
+            f'style="border:none;"></iframe>'
+        )
+        return iframe
+
+    else:
+        raise ValueError(f"未知の mode: {mode!r}")
