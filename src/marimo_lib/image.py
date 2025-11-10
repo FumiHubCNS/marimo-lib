@@ -36,7 +36,7 @@ def get_image_html(
         if width is not None:
             style_parts.append(f"width:{width}")
         if rounded:
-            style_parts.append("border-radius:{round_radius}")  # ほぼ丸 / pill 形
+            style_parts.append(f"border-radius:{round_radius}")  # ほぼ丸 / pill 形
 
         style_attr = "; ".join(style_parts)
 
