@@ -24,3 +24,6 @@ build-backend = "hatchling.build"
 
 [tool.uv.sources]
 modraw = { git = "https://github.com/FumiHubCNS/modraw" }
+
+[tool.marimo.runtime]
+output_max_bytes = 50_000_000
