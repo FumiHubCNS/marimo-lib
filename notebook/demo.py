@@ -336,10 +336,10 @@ def _(GLOBAL_FIG_WIDTH: int, mo, schedule, values):
             """
             #### カレンダーの一例
 
-            - `plotly`にはガントチャート用関数は使いにくい。
+            - `plotly`にはガントチャート用関数があるが非常に使いにくい。
               - `plotly.express.timeline()`で`Figure`のインスタンス生成
               - `add_trace()`で追加
-              -　`marimo_lib.plot`の関数でよく使われる`plotly.graph_objects.Figure`に対応
+              - `marimo_lib.plot`の関数でよく使われる`plotly.graph_objects.Figure`に対応
             - `timeline_info`で表示するタスクのグループやガントチャートのテキストなどを変更できる。
             - `fill_map`, `edge_map`, `line_map`, `taskname_map`などで負荷情報を付与
             """
