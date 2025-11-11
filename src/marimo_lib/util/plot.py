@@ -415,7 +415,7 @@ def get_np_histogram2d(
     Parameters
     ----------
     data : 
-        2 dimansional data list [x[1,2,1,...,1], y[3,2,1,...,3]]
+        2 or 3 dimansional data list [x[1,2,1,...,1], y[3,2,1,...,3], z[3,2,1,...,3]]
     bins : 
         bin information [bin number for x, bin number for y]
     xrange : 
@@ -772,7 +772,14 @@ def plot_2d(fig, irow, icol, data, bins, logs, xrange, yrange, debug, dataname, 
 
     plot function with `plot_type`='2d'
     """  
-    counts, xedges, yedges = get_np_histogram2d(data=data, bins=bins, xrange=xrange, yrange=yrange)
+
+    if len(data) == 2: 
+        counts, xedges, yedges = get_np_histogram2d(data=data, bins=bins, xrange=xrange, yrange=yrange)
+    else:
+        x = data[0]
+        y = data[1]
+        w = data[2]
+        counts, xedges, yedges = np.histogram2d(x, y, bins=[20, 20], weights=w)
 
     if logs[2]:
         counts = np.log10(counts + 1)
