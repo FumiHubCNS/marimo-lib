@@ -4,6 +4,7 @@ import pandas as pd
 import datetime as dt
 import plotly.graph_objects as go
 from typing import Any
+import os 
 
 def get_color_list(label: str = "tokyo", alpha: float = 0.6):
     color_list = []
@@ -39,64 +40,68 @@ def get_color_list(label: str = "tokyo", alpha: float = 0.6):
 
     elif label == "pastel":
         color_list = [
-            f"rgba(255, 179, 186, {alpha})",  # ピンク
-            f"rgba(255, 223, 186, {alpha})",  # オレンジ
-            f"rgba(255, 255, 186, {alpha})",  # イエロー
-            f"rgba(186, 255, 201, {alpha})",  # グリーン
-            f"rgba(186, 225, 255, {alpha})",  # ブルー
+            f"rgba(255, 179, 186, {alpha})",
+            f"rgba(255, 223, 186, {alpha})",
+            f"rgba(255, 255, 186, {alpha})",
+            f"rgba(186, 255, 201, {alpha})",
+            f"rgba(186, 225, 255, {alpha})", 
         ]
 
     elif label == "neon":
         color_list = [
-            f"rgba( 57, 255,  20, {alpha})",  # ネオングリーン
-            f"rgba(255,  20, 147, {alpha})",  # ディープピンク
-            f"rgba(  0, 255, 255, {alpha})",  # シアン
-            f"rgba(255, 255,   0, {alpha})",  # イエロー
-            f"rgba(138,  43, 226, {alpha})",  # ブルーバイオレット
+            f"rgba( 57, 255,  20, {alpha})",
+            f"rgba(255,  20, 147, {alpha})",
+            f"rgba(  0, 255, 255, {alpha})",
+            f"rgba(255, 255,   0, {alpha})",
+            f"rgba(138,  43, 226, {alpha})",
         ]
 
     elif label == "tab10":
         color_list = [
-            f"rgba( 31, 119, 180, {alpha})",  # 青
-            f"rgba(255, 127,  14, {alpha})",  # オレンジ
-            f"rgba( 44, 160,  44, {alpha})",  # 緑
-            f"rgba(214,  39,  40, {alpha})",  # 赤
-            f"rgba(148, 103, 189, {alpha})",  # 紫
-            f"rgba(140,  86,  75, {alpha})",  # 茶
-            f"rgba(227, 119, 194, {alpha})",  # ピンク
-            f"rgba(127, 127, 127, {alpha})",  # グレー
-            f"rgba(188, 189,  34, {alpha})",  # 黄緑
-            f"rgba( 23, 190, 207, {alpha})",  # 水色
+            f"rgba( 31, 119, 180, {alpha})",
+            f"rgba(255, 127,  14, {alpha})",
+            f"rgba( 44, 160,  44, {alpha})",
+            f"rgba(214,  39,  40, {alpha})",
+            f"rgba(148, 103, 189, {alpha})",
+            f"rgba(140,  86,  75, {alpha})",
+            f"rgba(227, 119, 194, {alpha})",
+            f"rgba(127, 127, 127, {alpha})",
+            f"rgba(188, 189,  34, {alpha})",
+            f"rgba( 23, 190, 207, {alpha})",
         ]
 
     elif label == "ud":
         color_list = [
-            f"rgba(  0,   0,   0, {alpha})",  # 黒
-            f"rgba(230, 159,   0, {alpha})",  # オレンジ
-            f"rgba( 86, 180, 233, {alpha})",  # スカイブルー
-            f"rgba(  0, 158, 115, {alpha})",  # 青緑
-            f"rgba(240, 228,  66, {alpha})",  # 黄
-            f"rgba(  0, 114, 178, {alpha})",  # 青
-            f"rgba(213,  94,   0, {alpha})",  # バーミリオン
-            f"rgba(204, 121, 167, {alpha})",  # 赤紫
+            f"rgba(  0,   0,   0, {alpha})",
+            f"rgba(230, 159,   0, {alpha})",
+            f"rgba( 86, 180, 233, {alpha})",
+            f"rgba(  0, 158, 115, {alpha})",
+            f"rgba(240, 228,  66, {alpha})",
+            f"rgba(  0, 114, 178, {alpha})",
+            f"rgba(213,  94,   0, {alpha})",
+            f"rgba(204, 121, 167, {alpha})",
         ]
 
     return color_list
+
+
+def init_schedule():
+    return pd.DataFrame(columns=["task", "start", "end", "resource", "name"])
 
 
 def add_periodic_task(
     data: pd.DataFrame | None,
     *,
     task: str,
-    start: str,          # 1回目の開始日時 "2025-11-05 13:30" など
-    end: str,            # 1回目の終了日時 "2025-11-05 14:00" など
+    start: str, 
+    end: str,
     resource: str,
     name: str,
-    repeat_until: str,   # どこまで繰り返すか（開始時刻がこの日時を超えない範囲）
-    every: int = 1,      # 何単位ごとに繰り返すか
-    unit: str = "D",     # "D"=日, "H"=時間, "W"=週 など pandas の freq 文字
-    seq_col: str | None = "Seq",  # 連番カラム名（Noneなら作らない）
-    **extra_cols: Any,   # 任意の追加カラム
+    repeat_until: str,
+    every: int = 1,
+    unit: str = "D",
+    seq_col: str | None = "Seq",
+    **extra_cols: Any,
 ) -> pd.DataFrame:
     """
     周期的にイベントを追加する。
@@ -111,9 +116,9 @@ def add_periodic_task(
             name="打ち合わせ①",
             repeat_until="2025-11-30 23:59",
             every=7,
-            unit="D",  # 7日ごと（=毎週）
+            unit="D",
             seq_col="MeetingID",
-            Room="会議室A",    # extra_cols の例
+            Room="会議室A",
         )
     """
 
@@ -134,11 +139,11 @@ def add_periodic_task(
         ed = st + duration
 
         row_kwargs: dict[str, Any] = {
-            "Task": task,
-            "Start": st.strftime("%Y-%m-%d %H:%M"),
-            "End":   ed.strftime("%Y-%m-%d %H:%M"),
-            "Resource": resource,
-            "Name": name,
+            "task": task,
+            "start": st.strftime("%Y-%m-%d %H:%M"),
+            "end":   ed.strftime("%Y-%m-%d %H:%M"),
+            "resource": resource,
+            "name": name,
         }
 
         if seq_col is not None:
@@ -146,21 +151,17 @@ def add_periodic_task(
 
         row_kwargs.update(extra_cols)
 
-        data = add_task(
-            data=data,
-            **row_kwargs,
-        )
+        add_task(data=data, **row_kwargs,)
 
-    return data
 
 def add_task(
     data: pd.DataFrame | None = None,
     *,
-    Task: str = "Task1",
-    Start: str = "2025-11-10 0:00",
-    End:   str = "2025-11-10 23:59",
-    Resource: str = "Resource1",
-    Name: str = "Name1",
+    task: str = "Task1",
+    start: str = "2025-11-10 0:00",
+    end:   str = "2025-11-10 23:59",
+    resource: str = "Resource1",
+    name: str = "Name1",
     **extra_cols: Any,
 ) -> pd.DataFrame:
     """
@@ -170,22 +171,22 @@ def add_task(
     例:
         df = add_task(
             None,
-            Task="Job A",
-            Start="2025-11-10 09:00",
-            End="2025-11-10 17:00",
-            Resource="Alex",
-            Name="Test1",
-            Priority=1,
-            Memo="first job",
+            task="Job A",
+            atart="2025-11-10 09:00",
+            end="2025-11-10 17:00",
+            resource="Alex",
+            name="Test1",
+            priority=1,
+            memo="first job",
         )
     """
 
     new_row: dict[str, Any] = {
-        "Task": Task,
-        "Start": Start,
-        "End": End,
-        "Resource": Resource,
-        "Name": Name,
+        "task": task,
+        "start": start,
+        "end": end,
+        "resource": resource,
+        "name": name,
     }
 
     new_row.update(extra_cols)
@@ -194,8 +195,6 @@ def add_task(
         data = pd.DataFrame([new_row])
     else:
         data.loc[len(data)] = new_row
-
-    return data
 
 
 def add_schedule(
@@ -278,3 +277,85 @@ def add_schedule(
         barmode="overlay",
         showlegend=False,
     )
+
+
+def load_schedule_file_as_str(input_path:str =  "filepath") -> str:
+    """
+    ファイルを読み込む関数
+
+    Load file.
+
+    Parameters
+    ----------
+    input_path : 
+        Input file path 
+
+    Returns
+    -------
+    str: 
+        String型に格納されたテキスト
+    """
+    if os.path.isfile(input_path) is True:
+        with open(input_path, "r", encoding="utf-8") as f:
+            txt = f.read()
+
+        return txt
+    
+    else:
+        return ""
+    
+
+def parse_schedule_txt(txt:str | None = None) -> list[dict[any, any]]:
+    if txt is not None:
+        lines = txt.strip().splitlines()
+        header = lines[0].split(",")
+        rows = []
+
+        for line in lines[1:]:
+            if not line.strip():
+                continue
+
+            fields = line.split(",")
+            row_dict = dict(zip(header, fields))
+            rows.append(row_dict)
+        
+        return rows
+
+    else:
+        return None
+
+
+def add_task_csv(
+    data: pd.DataFrame | None = None,
+    input_path: str | None = None,
+    func_label: str = "func",
+) -> pd.DataFrame:
+    
+    csv_str = load_schedule_file_as_str(input_path)
+    csv_list = parse_schedule_txt(csv_str)
+
+    for row in csv_list:
+        func_name = row.get(func_label, "").strip()
+
+        if not func_name:
+            continue
+
+        kwargs: dict[str, Any] = {
+            k: v for k, v in row.items()
+            if k != func_label and v != ""
+        }
+
+        if "every" in kwargs:
+            kwargs["every"] = int(kwargs["every"])
+        if "priority" in kwargs:
+            kwargs["priority"] = int(kwargs["priority"])
+
+        if func_name == "add_task":
+            add_task(data=data, **kwargs,)
+
+        elif func_name == "add_periodic_task":
+            add_periodic_task(data=data, **kwargs,)
+
+        else:
+            print(f"unknown func: {func_name}, row={row}")
+            continue

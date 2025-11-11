@@ -2,7 +2,7 @@ import marimo
 
 __generated_with = "0.17.7"
 app = marimo.App(
-    width="medium",
+    width="full",
     layout_file="layouts/demo.slides.json",
     auto_download=["html"],
 )
@@ -13,6 +13,7 @@ with app.setup:
     from plotly.subplots import make_subplots
     import random
     import numpy as np
+    import pandas as pd
     from modraw import Draw
     from mohtml import img
     from pathlib import Path
@@ -52,6 +53,8 @@ def _(mo):
             最終的にはHTMLで保存を行いたいので図を挿入する際はマークダウン記法で書かず`base64`にてHTMLテキストにして変数に格納する。
 
             `mo.Html(html_test)`にて描画
+
+            <br>
 
             """
         ),
@@ -192,35 +195,37 @@ def _(GLOBAL_FIG_WIDTH: int, fig, mo):
 
 @app.cell
 def _(mo):
-    schedule = molib.schedule.add_periodic_task(
-        data=None,
+    schedule = molib.schedule.init_schedule()
+
+    molib.schedule.add_periodic_task(
+        data=schedule,
         task="朝会",
         start="2025-10-01 09:00",
         end="2025-10-03 09:00",
         resource="TeamA",
         name="デイリースタンドアップ",
         repeat_until="2025-11-30 23:59",
-        every=15,       # 1日ごと
-        unit="D",      # 日
+        every=15,
+        unit="D",
         seq_col="StandupNo",
-        Owner="TeamA",  # 追加カラムの例
+        owner="TeamA",
     )
 
-    schedule = molib.schedule.add_periodic_task(
+    molib.schedule.add_periodic_task(
         data=schedule,
         task="進捗会議",
-        start="2025-10-03 14:00",      # 1回目（金曜日）
+        start="2025-10-03 14:00",
         end="2025-10-03 18:00",
         resource="Meeting",
         name="週次進捗会議",
         repeat_until="2025-11-30 23:59",
-        every=7,       # 7日ごと＝週1
+        every=7, 
         unit="D",
         seq_col="WeeklyNo",
-        Room="会議室A",
+        room="会議室A",
     )
 
-    schedule = molib.schedule.add_periodic_task(
+    molib.schedule.add_periodic_task(
         data=schedule,
         task="監視チェック",
         start="2025-10-09 12:00",
@@ -228,44 +233,52 @@ def _(mo):
         resource="Monitoring",
         name="監視チェック",
         repeat_until="2025-11-30 23:59",
-        every=14,       # 2時間ごと
-        unit="D",      # 時間
+        every=14,
+        unit="D",
         seq_col="MonCheckID",
     )
 
-    schedule = molib.schedule.add_task(
+    molib.schedule.add_task(
         data=schedule,
-        Task="リリース作業",
-        Start="2025-10-01 20:00",
-        End="2025-10-06 23:00",
-        Resource="Release",
-        Name="v1.0 リリース",
-        Priority=1,
-        Owner="ReleaseTeam",
+        task="リリース作業",
+        start="2025-10-01 20:00",
+        end="2025-10-06 23:00",
+        resource="Release",
+        name="v1.0 リリース",
+        priority=1,
+        owner="ReleaseTeam",
     )
 
-    schedule = molib.schedule.add_task(
+    molib.schedule.add_task(
         data=schedule,
-        Task="リリース作業",
-        Start="2025-10-30 20:00",
-        End="2025-11-08 23:00",
-        Resource="Release",
-        Name="v1.1 リリース",
-        Priority=1,
-        Owner="ReleaseTeam",
+        task="リリース作業",
+        start="2025-10-30 20:00",
+        end="2025-11-08 23:00",
+        resource="Release",
+        name="v1.1 リリース",
+        priority=1,
+        owner="ReleaseTeam",
     )
 
-    schedule = molib.schedule.add_task(
+    molib.schedule.add_task(
         data=schedule,
-        Task="リリース作業",
-        Start="2025-11-15 20:00",
-        End="2025-11-30 23:00",
-        Resource="Release",
-        Name="v1.2 リリース",
-        Priority=1,
-        Owner="ReleaseTeam",
+        task="リリース作業",
+        start="2025-11-15 20:00",
+        end="2025-11-30 23:00",
+        resource="Release",
+        name="v1.2 リリース",
+        priority=1,
+        owner="ReleaseTeam",
     )
 
+    molib.schedule.add_task_csv(
+        data=schedule,
+        input_path="notebook/data/schedule.csv",
+        func_label="func",
+    )
+
+
+    values = schedule["resource"].unique().tolist()
 
     mo.vstack([
         mo.md(
@@ -273,27 +286,28 @@ def _(mo):
             ### `schedule.py`
 
             スケジュール表示用の関数群。
-            `add_task`や`add_periodic_task`などで`pandas.Dataframe`のタスク群を生成
+            `molib.schedule.init_schedule`で初期化（※単純に列のみのからDataframeを返す）。
+            `add_task`や`add_periodic_task`などで`pandas.Dataframe`のタスク群を生成。
+            csvにスケジュールを書いてそれを読み込むことも可能。`schedule.add_task_csv`を使う。
 
             - `add_periodic_task`は`add_task`を周期的に実行
+            - `schedule.add_task_csv`ではtaskの追加のために使用する関数を書く列が必要。
             - ベースとなる列はあるが、ユーザー独自の列を追加できるようになっている。
             """
         ),
         schedule.head(20)
     ])
-    return (schedule,)
+    return schedule, values
 
 
 @app.cell
-def _(GLOBAL_FIG_WIDTH: int, mo, schedule):
-    values = schedule["Resource"].unique().tolist()
-
+def _(GLOBAL_FIG_WIDTH: int, mo, schedule, values):
     timeline_info = dict(
-        x_start="Start",
-        x_end="End",
-        y="Resource",
-        color="Resource",
-        text="Name",
+        x_start="start",
+        x_end="end",
+        y="resource",
+        color="resource",
+        text="name",
     )
 
     fill_palette = molib.schedule.get_color_list('tab10',0.3)
