@@ -779,7 +779,7 @@ def plot_2d(fig, irow, icol, data, bins, logs, xrange, yrange, debug, dataname, 
         x = data[0]
         y = data[1]
         w = data[2]
-        counts, xedges, yedges = np.histogram2d(x, y, bins=[20, 20], weights=w)
+        counts, xedges, yedges = np.histogram2d(x, y, bins=bins, weights=w)
 
     if logs[2]:
         counts = np.log10(counts + 1)
