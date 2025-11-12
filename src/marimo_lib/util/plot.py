@@ -440,17 +440,23 @@ def get_np_histogram2d(
     x = data[0]
     y = data[1]
 
-    x = pd.to_numeric(x, errors='coerce')
-    y = pd.to_numeric(y, errors='coerce')
+    if len(data) == 2:
 
-    mask = ~np.isnan(x) & ~np.isnan(y)
-    x_clean = x[mask]
-    y_clean = y[mask]
+        x = pd.to_numeric(x, errors='coerce')
+        y = pd.to_numeric(y, errors='coerce')
 
-    if len(xrange) >= 2 and len(yrange) >= 2:
-        counts, xedges, yedges = np.histogram2d(x_clean, y_clean, bins=bins,range=[xrange, yrange])
+        mask = ~np.isnan(x) & ~np.isnan(y)
+        x_clean = x[mask]
+        y_clean = y[mask]
+
+        if len(xrange) >= 2 and len(yrange) >= 2:
+            counts, xedges, yedges = np.histogram2d(x_clean, y_clean, bins=bins,range=[xrange, yrange])
+        else:
+            counts, xedges, yedges = np.histogram2d(x_clean, y_clean, bins=bins) 
+
     else:
-        counts, xedges, yedges = np.histogram2d(x_clean, y_clean, bins=bins) 
+        w = data[2]
+        counts, xedges, yedges = np.histogram2d(x, y, bins=bins, weights=w)
 
     return counts, xedges, yedges
 
@@ -772,15 +778,8 @@ def plot_2d(fig, irow, icol, data, bins, logs, xrange, yrange, debug, dataname, 
 
     plot function with `plot_type`='2d'
     """  
-
-    if len(data) == 2: 
-        counts, xedges, yedges = get_np_histogram2d(data=data, bins=bins, xrange=xrange, yrange=yrange)
-    else:
-        x = data[0]
-        y = data[1]
-        w = data[2]
-        counts, xedges, yedges = np.histogram2d(x, y, bins=bins, weights=w)
-
+    counts, xedges, yedges = get_np_histogram2d(data=data, bins=bins, xrange=xrange, yrange=yrange)
+    
     if logs[2]:
         counts = np.log10(counts + 1)
 
