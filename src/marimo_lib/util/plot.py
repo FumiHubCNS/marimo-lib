@@ -467,92 +467,105 @@ def slice_1d_from_2dhist(
     bin_index: int,
     *,
     slice_axis: str = "x",   # 'x' なら xビン固定→y分布, 'y' なら yビン固定→x分布
-    bin_span: int = 1,       # 何ビン分まとめるか（[bin_index, bin_index+bin_span)）
+    bin_span: int = 1,       # まとめるビン数（[bin_index, bin_index+bin_span)）
     normalize: bool = False,
-) -> Dict[str, np.ndarray]:
+) -> Dict[str, Any]:
     """
-    二次元ヒストグラムから指定した軸の「ビン範囲」でスライスして、残りの軸の1Dヒストを取り出す。
-
-    Slice the 2D histogram using the specified axis's `bin range` to extract the 1D histogram for the remaining axis.
+    二次元ヒスト (counts: shape=(nx, ny)) を、指定軸のビン範囲で合算し、
+    残りの軸の 1D ヒストグラムを返す。あわせて**固定した軸側の中心値・ビン幅**も返す。
 
     Parameters
     ----------
-    counts : shape = (nx, ny)
-    xedges : shape = (nx+1,)
-    yedges : shape = (ny+1,)
+    counts : np.ndarray, shape = (nx, ny)
+    xedges : np.ndarray, shape = (nx+1,)
+    yedges : np.ndarray, shape = (ny+1,)
     bin_index : int
-        スライス開始ビン番号（0 始まり）
-        slice_axis == 'x' のとき: 0..nx-1
-        slice_axis == 'y' のとき: 0..ny-1
-    slice_axis : {'x', 'y'}
-        'x' → xビン範囲を固定して y の分布を返す
-        'y' → yビン範囲を固定して x の分布を返す
+        スライス開始ビン（0 始まり）
+    slice_axis : {'x','y'}
+        'x' → xビンを [bin_index, bin_index+bin_span) 固定して y 分布を返す  
+        'y' → yビンを [bin_index, bin_index+bin_span) 固定して x 分布を返す
     bin_span : int, default 1
-        まとめるビン数。
-        例: bin_index=3, bin_span=2 → ビン 3 と 4 を合算。
-    normalize : True のとき総和1に正規化
+        何ビン分まとめるか（終了ビンは含まない）
+    normalize : bool, default False
+        True のとき 1D ヒストを総和 1 で正規化
 
     Returns
     -------
-    dict: 
+    dict
         {
-            "counts":  (n_other,),
-            "edges":   (n_other+1,),
-            "centers": (n_other,),
-            "axis":    str,
-            "indices": np.ndarray[int],
-            "bin_index": int,
-            "bin_span": int
+          "counts":        np.ndarray  # 残り軸の 1D ヒスト（合算後）
+          "edges":         np.ndarray  # 残り軸のエッジ (n_other+1,)
+          "centers":       np.ndarray  # 残り軸の中心 (n_other,)
+          "widths":        np.ndarray  # 残り軸のビン幅 (n_other,)
+          "slice_axis":    str         # 'x' or 'y'
+          "indices":       np.ndarray  # 固定した軸のビンインデックス [start..stop-1]
+          "slice_edges":   np.ndarray  # 固定した軸の選択エッジ列 (bin_span+1,)
+          "slice_centers": np.ndarray  # 固定した軸の選択ビン中心 (bin_span,)
+          "slice_widths":  np.ndarray  # 固定した軸の選択ビン幅 (bin_span,)
+          "bin_index":     int
+          "bin_span":      int
         }
     """
     if counts.ndim != 2:
         raise ValueError("counts must be 2D (nx, ny)")
 
     nx, ny = counts.shape
+    if len(xedges) != nx + 1 or len(yedges) != ny + 1:
+        raise ValueError("xedges/yedges shape mismatch with counts shape.")
 
     if slice_axis not in ("x", "y"):
-        raise ValueError(f"slice_axis must be 'x' or 'y', got {slice_axis!r}")
+        raise ValueError("slice_axis must be 'x' or 'y'")
 
     if bin_span < 1:
         raise ValueError(f"bin_span must be >= 1, got {bin_span}")
 
     if slice_axis == "x":
         start = bin_index
-        stop = bin_index + bin_span
-        if not (0 <= start < nx) or stop > nx:
-            raise IndexError(
-                f"x bin range out of range: start={start}, stop={stop}, nx={nx}"
-            )
-        # x方向に複数ビンをまとめて y方向に積分
-        counts_1d = counts[start:stop, :].sum(axis=0).astype(float)  # (ny,)
-        edges = yedges
-        centers = 0.5 * (yedges[:-1] + yedges[1:])
+        stop  = bin_index + bin_span
+        if not (0 <= start < nx) or not (start < stop <= nx):
+            raise IndexError(f"x bin range out of range: start={start}, stop={stop}, nx={nx}")
+
+        counts_1d = counts[start:stop, :].sum(axis=0).astype(float)
+        other_edges   = yedges
+        other_centers = 0.5 * (yedges[:-1] + yedges[1:])
+        other_widths  = np.diff(yedges)
+
+        slice_edges   = xedges[start:stop+1]
+        slice_centers = 0.5 * (slice_edges[:-1] + slice_edges[1:])
+        slice_widths  = np.diff(slice_edges)
         indices = np.arange(start, stop)
 
     else:  # slice_axis == "y"
-        start = bin_index
-        stop = bin_index + bin_span
-        if not (0 <= start < ny) or stop > ny:
-            raise IndexError(
-                f"y bin range out of range: start={start}, stop={stop}, ny={ny}"
-            )
-        # y方向に複数ビンをまとめて x方向に積分
-        counts_1d = counts[:, start:stop].sum(axis=1).astype(float)  # (nx,)
-        edges = xedges
-        centers = 0.5 * (xedges[:-1] + xedges[1:])
+        start = int(bin_index)
+        stop  = start + int(bin_span)
+        if not (0 <= start < ny) or not (start < stop <= ny):
+            raise IndexError(f"y bin range out of range: start={start}, stop={stop}, ny={ny}")
+
+        counts_1d = counts[:, start:stop].sum(axis=1).astype(float)
+        other_edges   = xedges
+        other_centers = 0.5 * (xedges[:-1] + xedges[1:])
+        other_widths  = np.diff(xedges)
+
+        slice_edges   = yedges[start:stop+1]
+        slice_centers = 0.5 * (slice_edges[:-1] + slice_edges[1:])
+        slice_widths  = np.diff(slice_edges)
         indices = np.arange(start, stop)
 
     if normalize and counts_1d.sum() > 0:
         counts_1d = counts_1d / counts_1d.sum()
 
     return {
-        "counts": counts_1d,
-        "edges": edges,
-        "centers": centers,
-        "axis": slice_axis,
-        "indices": indices,
-        "bin_index": bin_index,
-        "bin_span": bin_span
+        "counts":        counts_1d,
+        "edges":         other_edges,
+        "centers":       other_centers,
+        "widths":        other_widths,
+        "slice_axis":    slice_axis,
+        "indices":       indices,
+        "slice_edges":   slice_edges,
+        "slice_centers": slice_centers,
+        "slice_widths":  slice_widths,
+        "bin_index":     start,
+        "bin_span":      bin_span,
     }
 
 

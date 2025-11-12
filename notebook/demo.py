@@ -127,7 +127,7 @@ def _(GLOBAL_FIG_WIDTH: int, mo, x_2d, y_2d):
     for _i in range(len(_data)):
         molib.plot.add_sub_plot(
             _fig, 1, 1, 'plot', [_data[_i]['centers'], _data[_i]['counts']], [f'Variable', f'Value'], logsf='000',
-            dataname=f'{_data[_i]["axis"]}-slice({_data[_i]["bin_index"]}:{_data[_i]["bin_index"]+_data[_i]["bin_span"]})'
+            dataname=f'{_data[_i]["slice_axis"]}-slice({_data[_i]["bin_index"]}:{_data[_i]["bin_index"]+_data[_i]["bin_span"]})'
         )
 
     _data = _data_y
@@ -135,7 +135,7 @@ def _(GLOBAL_FIG_WIDTH: int, mo, x_2d, y_2d):
     for _i in range(len(_data)):
         molib.plot.add_sub_plot(
             _fig, 1, 2, 'plot', [_data[_i]['centers'], _data[_i]['counts']], [f'Variable', f'Value'], logsf='000',
-            dataname=f'{_data[_i]["axis"]}-slice({_data[_i]["bin_index"]}:{_data[_i]["bin_index"]+_data[_i]["bin_span"]})'
+            dataname=f'{_data[_i]["slice_axis"]}-slice({_data[_i]["bin_index"]}:{_data[_i]["bin_index"]+_data[_i]["bin_span"]})'
         )
 
     mo.vstack([
