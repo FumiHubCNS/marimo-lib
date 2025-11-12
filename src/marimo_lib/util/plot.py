@@ -455,8 +455,20 @@ def get_np_histogram2d(
             counts, xedges, yedges = np.histogram2d(x_clean, y_clean, bins=bins) 
 
     else:
+
+        def centers_to_edges_from_centers(centers: np.ndarray) -> np.ndarray:
+            c = np.sort(np.unique(centers))       # ★ 重複除去が必須
+            mid = 0.5 * (c[:-1] + c[1:])
+            left  = c[0]  - (c[1]  - c[0])  / 2
+            right = c[-1] + (c[-1] - c[-2]) / 2
+            return np.r_[left, mid, right]
+        
         w = data[2]
-        counts, xedges, yedges = np.histogram2d(x, y, bins=bins, weights=w)
+
+        xedges = centers_to_edges_from_centers(x)
+        yedges = centers_to_edges_from_centers(y)
+
+        counts, xedges, yedges = np.histogram2d(x, y, bins=[xedges, yedges], weights=w)
 
     return counts, xedges, yedges
 
