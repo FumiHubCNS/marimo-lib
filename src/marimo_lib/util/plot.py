@@ -11,6 +11,8 @@ from typing import Tuple, Dict
 from typing import List, Any, Optional
 import plotly.io as pio
 import base64
+from typing import Callable
+import inspect
 
 pio.renderers.default = "browser"
 
@@ -637,147 +639,84 @@ def get_slice_array(
 
     return histo_array
 
+
 def add_sub_plot(
-        fig,
-        irow:int = 1,
-        icol:int = 1, 
-        plot_type="1d",
-        data:list = None,
-        labels:list = None,
-        bins=[200,200],
-        logsf:str = None,
-        xrange:list = None,
-        yrange:list = None,
-        debug:bool = False,
-        legends:list = None,
-        dataname:str = None,
-        color:str = None,
-        colormap:str = "Viridis"
+    fig:go.Figure,
+    irow:int = 1,
+    icol:int = 1, 
+    data:list | None = None,
+    axes_title:list | None = None,
+    log_option:str | list | None = None,
+    legend_option:list | None = None,  
+    func: Callable[..., Any] | None = None,
+    **kwargs,
 ):
-    """
-    Plotlyでsub plotを追加する内製関数
+    if axes_title is None:
+        axes_title = ['x', 'y']
 
-    Add subplots in Plotly
-        
-    Parameters
-    ----------
-    fig : 
-        Instance of plotly.graph_objects.Figure 
-    irow : 
-        Number of row
-    icol : 
-        Number of column
-    plot_type : 
-        Plot type written by string format
-    data : 
-        2 dimansional data list [x[1,2,1,...,1], y[3,2,1,...,3]]
-    bins : 
-        Axis information [bin number for x, bin number for y]
-    bins : 
-        Bin information [bin number for x, bin number for y]
-    logsf : 
-        Log flag for 3d axies in string format if true -> 1. e.g. 'xyz' -> '001' if you want to set log scale to z.
-    xrange : 
-        Effective range for x axis [min, max]
-    yrange : 
-        Effective range for y axis [min, max]
-    debug : 
-        Flag to dump debug information
-    legends : 
-        Legend setting. [0], [1]: box position. [2], [3]: box anchor, [4]: box align, [5]: margin. 
-    dataname : 
-        Data name
-    color : 
-        Plot color in string format
-    colormap : 
-        Heatmap in string format
-    """  
-    if data is None:
-        data = []
+    if log_option is None:
+        log_option = [False, False]
 
-    if labels is None:
-        labels = []
-
-    if bins is None:
-        bins = [200, 200]
-
-    if logsf is None:
-        logs = [False, False, False]
     else:
         logs = []
-        for i in range(3):
-            val_bool = True if logsf[i] == "1" else False
+        
+        for i in range(2):
+            val_bool = True if log_option[i] == "1" else False
             logs.append(val_bool)
 
-    if xrange is None:
-        xrange = []
+        log_option = logs
 
-    if yrange is None:
-        yrange = []
+    xtype = '-' if log_option[0] is False else 'log'
+    ytype = '-' if log_option[1] is False else 'log'
 
-    xtype = '-' if logs[0] is False else 'log'
-    ytype = '-' if logs[1] is False else 'log'
- 
-    if plot_type == '1d':
-        plot_1d(fig, irow, icol, data, bins, xrange, dataname)
+    if func is not None:
+        sig = inspect.signature(func)
+        accepted = {k: v for k, v in kwargs.items() if k in sig.parameters}
+        func(fig, irow, icol, data, **accepted)
 
-    elif plot_type == '2d':
-        plot_2d(fig, irow, icol, data, bins, logs, xrange, yrange, debug, dataname, colormap)
-    
-    elif plot_type == 'scatter':
-        plot_scatter(fig, irow, icol, data, dataname, color)
+    fig.update_xaxes(
+        type = xtype,
+        title_text = axes_title[0],
+        row = irow,
+        col = icol
+    )
 
-    elif plot_type == 'fit':
-        plot_fit(fig, irow, icol, data, dataname, color)
+    fig.update_yaxes(
+        type = ytype,
+        title_text = axes_title[1],
+        row = irow,
+        col = icol
+    )
 
-    elif plot_type == 'plot':
-        plot_plot(fig, irow, icol, data, dataname, color)
-
-    elif plot_type == 'spark-hist':
-        plot_spark_hist(fig, irow, icol, data, dataname)
-    
-    elif plot_type == 'error':
-        plot_error(fig, irow, icol, data, dataname, color)    
-
-    if len(labels) >=2:
-        fig.update_xaxes(
-            type = xtype,
-            title_text = labels[0],
-            row = irow,
-            col = icol
-        )
-
-        fig.update_yaxes(
-            type = ytype,
-            title_text = labels[1],
-            row = irow,
-            col = icol
-        )
-
-    if legends is not None:
-        if len(legends) > 5:
+    if legend_option is not None:
+        if len(legend_option) > 5:
             fig.update_layout(
                 legend=dict(
-                    x = legends[0],
-                    y = legends[1],   
-                    xanchor = legends[2],
-                    yanchor = legends[3],
-                    orientation = legends[4]  
+                    x = legend_option[0],
+                    y = legend_option[1],   
+                    xanchor = legend_option[2],
+                    yanchor = legend_option[3],
+                    orientation = legend_option[4]  
                 ),
-                margin=dict(r = legends[5])               
+                margin=dict(r = legend_option[5])               
         )
-            
-####################################################
-### user define plot function
-####################################################
 
-def plot_1d(fig, irow, icol, data, bins, xrange, dataname):
+
+def go_Histogram(
+    fig:go.Figure, 
+    irow:int,
+    icol:int,
+    data:list,
+    bins:list[int] | None = None,
+    xrange:list[int,int] | None = None,
+    dataname:str | None = None,
+):
     """
-    `plot_type`='1d'での描画関数
-
-    plot function with `plot_type`='1d'
+    coming soon
     """  
-    if len(xrange) < 2:
+    bins = [200] if bins is None else bins
+
+    if xrange is None:
         fig.add_trace(
             go.Histogram(x=data[0],nbinsx=bins[0],name=dataname),
             row=irow, col=icol
@@ -797,18 +736,30 @@ def plot_1d(fig, irow, icol, data, bins, xrange, dataname):
         )
 
 
-def plot_2d(fig, irow, icol, data, bins, logs, xrange, yrange, debug, dataname, colormap):
+def go_Heatmap(
+    fig:go.Figure, 
+    irow:int,
+    icol:int,
+    data:list,
+    bins:list[int,int] | None = None,
+    logz_option:bool = False,
+    xrange:list[int,int] | None = None,
+    yrange:list[int,int] | None = None,
+    debug:bool = False,
+    dataname:str | None = None,
+    colormap:str = "Turbo"
+):
     """
-    `plot_type`='2d'での描画関数
-
-    plot function with `plot_type`='2d'
+    coming soon...
     """  
+    bins = [200, 200] if bins is None else bins
+
     counts, xedges, yedges = get_np_histogram2d(data=data, bins=bins, xrange=xrange, yrange=yrange)
     
-    if logs[2]:
+    if logz_option:
         counts = np.log10(counts + 1)
 
-    bar_title = "ln(+1)" if logs[2] else "Count" 
+    bar_title = "ln(+1)" if logz_option else "Count" 
 
     xcenters = 0.5 * (xedges[:-1] + xedges[1:])
     ycenters = 0.5 * (yedges[:-1] + yedges[1:])
@@ -856,175 +807,105 @@ def plot_2d(fig, irow, icol, data, bins, logs, xrange, yrange, debug, dataname, 
         print(f"[debug] Entries {total_count}, Max value {max_val} at ({x_at_max},{y_at_max}), Min value {min_val} at ({x_at_min},{y_at_min})")
 
 
-def plot_scatter(fig, irow, icol, data, dataname, color):
+def go_Scatter(
+    fig:go.Figure, 
+    irow:int,
+    icol:int,
+    data:list,
+    mode:str = 'markers',
+    size:int = 4,
+    width:int = 1,
+    dataname:str | None = None,
+    color:str | None = None,
+    y_error:list | None = None,
+    x_error:list | None = None,
+    errors_type:str = 'data' 
+):
     """
-    `plot_type`='scatter'での描画関数
-
-    plot function with `plot_type`='scatter'
+    comming soon...
     """  
-    if color is not None:
+    if y_error is not None:
+        if len(y_error) == 1:
+            error_y = dict(
+                type = errors_type,
+                array = y_error[0],
+                visible = True
+            )
+        elif len(y_error) >= 2:
+            error_y = dict(
+                type = errors_type,
+                array = y_error[0],
+                arrayminus = y_error[1],
+                visible = True
+            )
+    else:
+        error_y = None
+
+    if x_error is not None:
+        if len(x_error) == 1:
+            error_x = dict(
+                type = errors_type,
+                array = x_error[0],
+                visible = True
+            )
+        elif len(x_error) >= 2:
+            error_x = dict(
+                type = errors_type,
+                array = x_error[0],
+                arrayminus = x_error[1],
+                visible = True
+            )
+    else:
+        error_x = None
+
+    if len(data) == 1:
         fig.add_trace(
             go.Scatter(
                 y = data[0],
-                mode = 'lines+markers',
-                marker = dict(size = 4, color = color),
-                line = dict(width = 1, color = color),
-                name = dataname
+                mode =  mode,
+                marker = dict(size = size, color = color),
+                line = dict(width = width, color = color),
+                name = dataname,
+                error_y = error_y,
+                error_x = error_x 
             ),
             row=irow, col=icol
         )
     else:
         fig.add_trace(
             go.Scatter(
-                y = data[0],
-                mode = 'lines+markers',
-                marker = dict(size = 4),
-                line = dict(width = 1),
-                name = dataname
+                x = data[0],
+                y = data[1],
+                mode =  mode,
+                marker = dict(size = size, color = color),
+                line = dict(width = width, color = color),
+                name = dataname,
+                error_y = error_y,
+                error_x = error_x 
             ),
-            row = irow,
-            col = icol
-        )  
+            row=irow, col=icol
+        )
 
-
-def plot_fit(fig, irow, icol, data, dataname, color):
+def go_Bar(
+    fig:go.Figure, 
+    irow:int,
+    icol:int,
+    data:list,
+    dataname:str | None = None,
+    color:str | None = None,
+):
     """
-    `plot_type`='fit'での描画関数
-
-    plot function with `plot_type`='fit'
-    """ 
-    if color is not None:
-        fig.add_trace(
-            go.Scatter(
-                x = data[0],
-                y = data[1],
-                mode = 'lines',
-                marker = dict(
-                    size = 4,
-                    color = color
-                ),
-                line = dict(
-                    width = 2,
-                    color = color
-                ),
-                name = dataname
-            ),
-            row = irow,
-            col = icol,
-        )
-    else:
-        fig.add_trace(
-            go.Scatter(
-                x = data[0],
-                y = data[1],
-                mode = 'lines',
-                marker = dict(size = 4),
-                line = dict(width = 2),
-                name = dataname
-            ),
-            row = irow,
-            col = icol,
-        )
-
-
-def plot_plot(fig, irow, icol, data, dataname, color):
-    """
-    `plot_type`=plot'での描画関数
-
-    plot function with `plot_type`='plot'
-    """ 
-    if color is not None:
-        fig.add_trace(
-            go.Scatter(
-                x = data[0],
-                y = data[1],
-                mode = 'markers',
-                marker = dict(
-                    size = 8,
-                    color = color
-                ),
-                line = dict(
-                    width = 1,
-                    color = color
-                ),
-                name = dataname),
-            row = irow, 
-            col = icol
-        )
-    else:
-        fig.add_trace(
-            go.Scatter(
-                x = data[0],
-                y = data[1],
-                mode = 'markers',
-                marker = dict(size = 8),
-                line = dict(width = 1),
-                name = dataname
-            ),
-            row = irow,
-            col = icol
-        )
-
-
-def plot_spark_hist(fig, irow, icol, data, dataname):
-    """
-    `plot_type`='spark-hist'での描画関数
-
-    plot function with `plot_type`='spark-hist'
+    coming soon...
     """ 
     fig.add_trace(
         go.Bar(
             x = data[0],
             y = data[1],
-            name = dataname
+            name = dataname,
         ),
         row = irow,
         col = icol
     )
-
-
-def plot_error(fig, irow, icol, data, dataname, color):
-    """
-    `plot_type`='error'での描画関数
-
-    plot function with `plot_type`='error'
-    """ 
-    if color is not None:
-        fig.add_trace(
-            go.Scatter(
-                x = data[0],
-                y = data[1],
-                mode = "markers",
-                name = dataname,
-                error_y = dict(
-                    type = "data",
-                    array = data[3],
-                    arrayminus = data[2],
-                    visible = True
-                )
-            ),
-            row = irow,
-            col = icol
-        )
-    else:
-        fig.add_trace(
-            go.Scatter(
-                x = data[0],
-                y = data[1],
-                mode="markers",
-                marker = dict(size = 4),
-                line = dict(width = 1),
-                name = dataname,
-                error_y = dict(
-                    type="data",
-                    array = data[3],
-                    arrayminus = data[2],
-                    visible = True
-                )
-            ),
-            row = irow,
-            col = icol
-        ) 
 
 
 def align_colorbar(fig, thickness=20, thicknessmode="pixels"):

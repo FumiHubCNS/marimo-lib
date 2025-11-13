@@ -88,8 +88,8 @@ def _(GLOBAL_FIG_WIDTH: int, mo):
     y_2d = np.random.rayleigh(scale=1, size=1000000)
 
     fig = make_subplots(rows=1, cols=2, vertical_spacing=0.15, horizontal_spacing=0.15, subplot_titles=(["1D Gaussian","2D Gaussian"]))
-    molib.plot.add_sub_plot(fig, 1, 1, 'error', [_x, _y, _el, _eu], [f'Variable', f'Value'], dataname='Data')
-    molib.plot.add_sub_plot(fig, 1, 2, '2d', [x_2d, y_2d], ['X', 'Y'], [200, 200], None, colormap='Turbo')
+    molib.plot.add_sub_plot(fig, 1, 1, data=[_x, _y], axes_title=['Variable', 'Value'], func=molib.plot.go_Scatter, y_error=[_el, _eu], dataname='Data')
+    molib.plot.add_sub_plot(fig, 1, 2, data=[x_2d, y_2d], axes_title=['X', 'Y'],func=molib.plot.go_Heatmap, bins=[200, 200], colormap='Turbo')
 
     mo.vstack([
         mo.md(
@@ -126,16 +126,16 @@ def _(GLOBAL_FIG_WIDTH: int, mo, x_2d, y_2d):
 
     for _i in range(len(_data)):
         molib.plot.add_sub_plot(
-            _fig, 1, 1, 'plot', [_data[_i]['centers'], _data[_i]['counts']], [f'Variable', f'Value'], logsf='000',
-            dataname=f'{_data[_i]["slice_axis"]}-slice({_data[_i]["bin_index"]}:{_data[_i]["bin_index"]+_data[_i]["bin_span"]})'
+            _fig, 1, 1, data=[_data[_i]['centers'], _data[_i]['counts']], axes_title=[f'Variable', f'Value'], log_option='00',
+            func=molib.plot.go_Scatter, dataname=f'{_data[_i]["slice_axis"]}-slice({_data[_i]["bin_index"]}:{_data[_i]["bin_index"]+_data[_i]["bin_span"]})',size=8
         )
 
     _data = _data_y
 
     for _i in range(len(_data)):
         molib.plot.add_sub_plot(
-            _fig, 1, 2, 'plot', [_data[_i]['centers'], _data[_i]['counts']], [f'Variable', f'Value'], logsf='000',
-            dataname=f'{_data[_i]["slice_axis"]}-slice({_data[_i]["bin_index"]}:{_data[_i]["bin_index"]+_data[_i]["bin_span"]})'
+            _fig, 1, 2, data=[_data[_i]['centers'], _data[_i]['counts']], axes_title=[f'Variable', f'Value'], log_option='00',
+            func=molib.plot.go_Scatter, dataname=f'{_data[_i]["slice_axis"]}-slice({_data[_i]["bin_index"]}:{_data[_i]["bin_index"]+_data[_i]["bin_span"]})',size=8
         )
 
     mo.vstack([
@@ -162,14 +162,8 @@ def _(GLOBAL_FIG_WIDTH: int, fig, mo):
 
     _fig = make_subplots(rows=1, cols=1, vertical_spacing=0.15, horizontal_spacing=0.15, subplot_titles=(["Data extracted from HTML"]))
     molib.plot.add_sub_plot(
-        _fig, 1, 1, 'error', 
-        [
-            _output_valu['x'],
-            _output_valu['y'],
-            _output_valu['error_y']['array'],
-            _output_valu['error_y']['arrayminus']  
-        ], 
-        [f'Variable', f'Value'], dataname='Data'
+        _fig, 1, 1, data=[_output_valu['x'],_output_valu['y']], axes_title=[f'Variable', f'Value'],
+        func=molib.plot.go_Scatter, y_error=[_output_valu['error_y']['array']], dataname='Data'
     )
 
     mo.vstack([
