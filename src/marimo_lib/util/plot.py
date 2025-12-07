@@ -664,7 +664,8 @@ def add_sub_plot(
     data:list | None = None,
     axes_title:list | None = None,
     log_option:str | list | None = None,
-    legend_option:list | None = None,  
+    legend_option:list | None = None, 
+    axis_font_size:list[int,int] | None = None,
     func: Callable[..., Any] | None = None,
     **kwargs,
 ):
@@ -720,6 +721,9 @@ def add_sub_plot(
             logs.append(val_bool)
 
         log_option = logs
+    
+    if axis_font_size is None:
+        axis_font_size = [12,14]
 
     xtype = '-' if log_option[0] is False else 'log'
     ytype = '-' if log_option[1] is False else 'log'
@@ -732,6 +736,8 @@ def add_sub_plot(
     fig.update_xaxes(
         type = xtype,
         title_text = axes_title[0],
+        tickfont=dict(size=axis_font_size[0]),
+        title_font=dict(size=axis_font_size[1]),
         row = irow,
         col = icol
     )
@@ -739,6 +745,8 @@ def add_sub_plot(
     fig.update_yaxes(
         type = ytype,
         title_text = axes_title[1],
+        tickfont=dict(size=axis_font_size[0]),
+        title_font=dict(size=axis_font_size[1]),
         row = irow,
         col = icol
     )
@@ -916,11 +924,14 @@ def go_Scatter(
     mode:str = 'markers',
     size:int = 4,
     width:int = 1,
+    bar_width:int = 1,
     dataname:str | None = None,
     color:str | None = None,
     y_error:list | None = None,
     x_error:list | None = None,
-    errors_type:str = 'data' 
+    errors_type:str = 'data',
+    colormap:str = "Turbo",
+    maptitle:str | None = None
 ):
     """
     plotly.graph_objectsのHistogramを使って図を追加する関数
@@ -944,6 +955,8 @@ def go_Scatter(
         Scatter size
     width :
         Line width
+    bar_width :
+        Error bar width
     dataneme :
         Data object label name
     color
@@ -961,14 +974,18 @@ def go_Scatter(
             error_y = dict(
                 type = errors_type,
                 array = y_error[0],
-                visible = True
+                visible = True,
+                thickness=width,
+                width=bar_width, 
             )
         elif len(y_error) >= 2:
             error_y = dict(
                 type = errors_type,
                 array = y_error[0],
                 arrayminus = y_error[1],
-                visible = True
+                visible = True,
+                thickness=width,
+                width=bar_width, 
             )
     else:
         error_y = None
@@ -978,14 +995,18 @@ def go_Scatter(
             error_x = dict(
                 type = errors_type,
                 array = x_error[0],
-                visible = True
+                visible = True,
+                thickness=width,
+                width=bar_width, 
             )
         elif len(x_error) >= 2:
             error_x = dict(
                 type = errors_type,
                 array = x_error[0],
                 arrayminus = x_error[1],
-                visible = True
+                visible = True,
+                thickness=width,
+                width=bar_width, 
             )
     else:
         error_x = None
@@ -1003,7 +1024,7 @@ def go_Scatter(
             ),
             row=irow, col=icol
         )
-    else:
+    elif len(data) == 2:
         fig.add_trace(
             go.Scatter(
                 x = data[0],
@@ -1017,6 +1038,25 @@ def go_Scatter(
             ),
             row=irow, col=icol
         )
+    else:
+        fig.add_trace(
+            go.Scatter(
+                x = data[0],
+                y = data[1],
+                mode =  mode,
+                marker = dict(
+                    size = size,
+                    color = data[2],
+                    colorscale = colormap,
+                    colorbar = dict(title = maptitle)
+                ),
+                name = dataname,
+                error_y = error_y,
+                error_x = error_x 
+            ),
+            row=irow, col=icol
+        )
+        
 
 def go_Bar(
     fig:go.Figure, 
@@ -1070,11 +1110,28 @@ def align_colorbar(fig, thickness=20, thicknessmode="pixels"):
         Width unit
     """  
     for trace in fig.data:
+        xref = getattr(trace, "xaxis", "x") or "x"
+        yref = getattr(trace, "yaxis", "y") or "y"
+
+        xaxis = "xaxis" if xref == "x" else "xaxis" + xref[1:]
+        yaxis = "yaxis" if yref == "y" else "yaxis" + yref[1:]
+        if xaxis not in fig.layout or yaxis not in fig.layout:
+            continue
+
+        xa = fig.layout[xaxis].domain
+        ya = fig.layout[yaxis].domain
+
+        cb_kwargs = dict(
+            thickness=thickness,
+            thicknessmode=thicknessmode,
+            x=xa[1] + 0.01,
+            y=(ya[0] + ya[1]) / 2,
+            len=ya[1] - ya[0],
+        )
+
         if isinstance(trace, go.Heatmap):
-            xaxis = "xaxis" if trace.xaxis == "x" else "xaxis" + trace.xaxis[1:]
-            yaxis = "yaxis" if trace.yaxis == "y" else "yaxis" + trace.yaxis[1:]
+            trace.update(colorbar=cb_kwargs)
 
-            xa = fig.layout[xaxis].domain
-            ya = fig.layout[yaxis].domain
-
-            trace.update(colorbar=dict(thickness=thickness, thicknessmode=thicknessmode, x=xa[1] + 0.01, y=(ya[0] + ya[1]) / 2, len=ya[1] - ya[0]))
+        if isinstance(trace, go.Scatter) and getattr(trace, "marker", None) is not None:
+            if getattr(trace.marker, "color", None) is not None and type(trace.marker.color) is not str:
+                trace.marker.colorbar.update(cb_kwargs)

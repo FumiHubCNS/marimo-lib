@@ -88,8 +88,18 @@ def _(GLOBAL_FIG_WIDTH: int, mo):
     y_2d = np.random.rayleigh(scale=1, size=1000000)
 
     fig = make_subplots(rows=1, cols=2, vertical_spacing=0.15, horizontal_spacing=0.15, subplot_titles=(["1D Gaussian","2D Gaussian"]))
-    molib.plot.add_sub_plot(fig, 1, 1, data=[_x, _y], axes_title=['Variable', 'Value'], func=molib.plot.go_Scatter, y_error=[_el, _eu], dataname='Data')
-    molib.plot.add_sub_plot(fig, 1, 2, data=[x_2d, y_2d], axes_title=['X', 'Y'],func=molib.plot.go_Heatmap, bins=[200, 200], colormap='Turbo')
+
+    molib.plot.add_sub_plot(
+        fig, 1, 1, data=[_x, _y], axes_title=['Variable', 'Value'], 
+        func=molib.plot.go_Scatter, 
+        y_error=[_el, _eu], dataname='Data', width=1, bar_width=2, size=4
+    )
+
+    molib.plot.add_sub_plot(
+        fig, 1, 2, data=[x_2d, y_2d], axes_title=['X', 'Y'],
+        func=molib.plot.go_Heatmap,
+        bins=[200, 200], colormap='Turbo'
+    )
 
     mo.vstack([
         mo.md(
@@ -363,11 +373,6 @@ def _(GLOBAL_FIG_WIDTH: int, mo):
             widget_ex
         ]),
     ])
-    return
-
-
-@app.cell
-def _():
     return
 
 
