@@ -262,6 +262,8 @@ def add_schedule(
         showgrid=True,
         gridwidth=1,
         griddash="dot",
+        tickformat="%m/%d(%a)\n%H:%M",
+        ticklabelmode="period",
         row=irow,
         col=icol,
     )
