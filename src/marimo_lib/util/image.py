@@ -3,29 +3,68 @@ from pathlib import Path
 import base64
 from PIL import Image
 import html
-from typing import Literal, Optional
+from typing import Literal, Optional, Union
 import marimo as mo
+
+SizeLike = Union[int, float, str]
+
+def _parse_px(v: Optional[SizeLike]) -> Optional[float]:
+    """int/float -> px とみなす。'123px' -> 123。'40%' 等は None."""
+    if v is None:
+        return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    s = str(v).strip().lower()
+    if s.endswith("px"):
+        try:
+            return float(s[:-2].strip())
+        except ValueError:
+            return None
+    # ％やemなどは計算できない
+    return None
+
+def _to_css_size(v: SizeLike) -> str:
+    """int/float は px にする。str はそのまま."""
+    if isinstance(v, (int, float)):
+        return f"{v}px"
+    return str(v)
 
 def get_image_html(
     input_path: str = "images.png",
     alt_name: str = "サンプル画像",
     *,
     mode: Literal["data_url", "file_src"] = "data_url",
-    width: Optional[str] = None,
+    width: Optional[SizeLike] = None,
+    height: Optional[SizeLike] = None,
     rounded: bool = False,
-    round_radius: Optional[str] = '10%',  
+    round_radius: str = "10%",
 ) -> str:
     """
     mode="data_url"  : <img src="data:image/png;base64,..."> を返す（従来どおり）
     mode="file_src"  : <img src="notebook/image/mini001.png" ...> を返す（mo.image 風）
+    - width & height 両方指定: そのまま使う（縦横比は無視）
+    - 片方だけ指定: もう片方は元画像の縦横比から自動計算（px指定のときのみ）
+    - 未指定: 元サイズ
     """
     path = Path(input_path)
-
+    
     if not path.is_file():
         raise FileNotFoundError(f"画像ファイルが見つかりません: {path}")
 
     with Image.open(path) as img:
-        img_width, img_height = img.size
+        img_w, img_h = img.size
+
+    w_px = _parse_px(width)
+    h_px = _parse_px(height)
+
+    computed_width: Optional[SizeLike] = width
+    computed_height: Optional[SizeLike] = height
+
+    if width is not None and height is None and w_px is not None:
+        computed_height = int(round(w_px * (img_h / img_w)))
+
+    elif height is not None and width is None and h_px is not None:
+        computed_width = int(round(h_px * (img_w / img_h)))
 
     alt_escaped = html.escape(alt_name)
 
@@ -34,26 +73,47 @@ def get_image_html(
         b64 = base64.b64encode(data).decode("ascii")
 
         style_parts = ["max-width:none", "height:auto"]
-        if width is not None:
-            style_parts.append(f"width:{width}")
+        if computed_width is not None:
+            style_parts.append(f"width:{_to_css_size(computed_width)}")
+        if computed_height is not None:
+            style_parts.append(f"height:{_to_css_size(computed_height)}")
         if rounded:
-            style_parts.append(f"border-radius:{round_radius}")  # ほぼ丸 / pill 形
+            style_parts.append(f"border-radius:{round_radius}")
 
         style_attr = "; ".join(style_parts)
+
+        w_attr = img_w
+        h_attr = img_h
+        if _parse_px(computed_width) is not None:
+            w_attr = int(round(_parse_px(computed_width)))
+        if _parse_px(computed_height) is not None:
+            h_attr = int(round(_parse_px(computed_height))) 
 
         html_text = (
             f'<img src="data:image/png;base64,{b64}" '
             f'alt="{alt_escaped}" '
-            f'width="{img_width}" height="{img_height}" '
+            f'width="{w_attr}" height="{h_attr}" '
             f'style="{style_attr}" />'
         )
         return html_text
 
     if mode == "file_src":
-        return mo.image(src=path, width=img_width, rounded=rounded)
+        if computed_height is None:
+            return mo.image(src=path, width=computed_width, rounded=rounded)
+
+        style = []
+        if computed_width is not None:
+            style.append(f"width:{_to_css_size(computed_width)}")
+        if computed_height is not None:
+            style.append(f"height:{_to_css_size(computed_height)}")
+        if rounded:
+            style.append(f"border-radius:{round_radius}; overflow:hidden")
+        style_attr = "; ".join(style)
+
+        inner = mo.image(src=path, rounded=False)
+        return mo.Html(f'<div style="{style_attr}">{inner.text}</div>')
 
     raise ValueError(f"未知の mode: {mode!r}")
-
 
 def get_video_html(
     input_path: str,
