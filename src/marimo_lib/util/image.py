@@ -5,7 +5,13 @@ from PIL import Image
 import html
 from typing import Literal, Optional, Union
 import marimo as mo
+import re 
 
+from io import BytesIO
+from urllib.parse import urlparse
+from urllib.request import urlopen
+
+PathOrStr = Union[str, Path]
 SizeLike = Union[int, float, str]
 
 def _parse_px(v: Optional[SizeLike]) -> Optional[float]:
@@ -29,8 +35,9 @@ def _to_css_size(v: SizeLike) -> str:
         return f"{v}px"
     return str(v)
 
+
 def get_image_html(
-    input_path: str = "images.png",
+    input_path: PathOrStr = "images.png",
     alt_name: str = "サンプル画像",
     *,
     mode: Literal["data_url", "file_src"] = "data_url",
@@ -46,14 +53,57 @@ def get_image_html(
     - 片方だけ指定: もう片方は元画像の縦横比から自動計算（px指定のときのみ）
     - 未指定: 元サイズ
     """
-    path = Path(input_path)
-    
-    if not path.is_file():
-        raise FileNotFoundError(f"画像ファイルが見つかりません: {path}")
 
-    with Image.open(path) as img:
-        img_w, img_h = img.size
+    # -----------------------
+    # 1) 入力をURL/Pathに分岐
+    # -----------------------
+    url: Optional[str] = None
+    path: Optional[Path] = None
 
+    if isinstance(input_path, Path):
+        path = input_path
+    elif isinstance(input_path, str):
+        p = urlparse(input_path)
+        if p.scheme in ("http", "https"):
+            # 'https:/raw...' のような壊れたURLをここで弾く（// は勝手に直さない）
+            if not p.netloc:
+                raise ValueError(
+                    f"URLが不正です: {input_path!r}\n"
+                    f"'https://...' のようにスキームの後ろは '//' にしてください。"
+                )
+            url = input_path
+        else:
+            # 相対/絶対パスは Path へ（文字列の // はそのまま渡す）
+            path = Path(input_path)
+    else:
+        raise TypeError(f"input_path must be str or Path, got {type(input_path)!r}")
+
+    # -----------------------
+    # 2) 画像の bytes と (w,h) を取得
+    # -----------------------
+    def _load_bytes_and_size_from_url(u: str) -> tuple[bytes, int, int]:
+        data = urlopen(u).read()
+        with Image.open(BytesIO(data)) as img:
+            w, h = img.size
+        return data, w, h
+
+    def _load_bytes_and_size_from_path(p: Path) -> tuple[bytes, int, int]:
+        if not p.is_file():
+            raise FileNotFoundError(f"画像ファイルが見つかりません: {p}")
+        data = p.read_bytes()
+        with Image.open(BytesIO(data)) as img:
+            w, h = img.size
+        return data, w, h
+
+    if url is not None:
+        data, img_w, img_h = _load_bytes_and_size_from_url(url)
+    else:
+        assert path is not None
+        data, img_w, img_h = _load_bytes_and_size_from_path(path)
+
+    # -----------------------
+    # 3) 幅・高さの自動計算（px指定のときだけ）
+    # -----------------------
     w_px = _parse_px(width)
     h_px = _parse_px(height)
 
@@ -62,17 +112,22 @@ def get_image_html(
 
     if width is not None and height is None and w_px is not None:
         computed_height = int(round(w_px * (img_h / img_w)))
-
     elif height is not None and width is None and h_px is not None:
         computed_width = int(round(h_px * (img_w / img_h)))
 
     alt_escaped = html.escape(alt_name)
 
+    # -----------------------
+    # 4) mode ごとの return（形式は変えない）
+    # -----------------------
     if mode == "data_url":
-        data = path.read_bytes()
         b64 = base64.b64encode(data).decode("ascii")
 
-        style_parts = ["max-width:none", "height:auto"]
+        style_parts = ["max-width:none"]
+        # 高さを指定していない場合のみ height:auto
+        if computed_height is None:
+            style_parts.append("height:auto")
+
         if computed_width is not None:
             style_parts.append(f"width:{_to_css_size(computed_width)}")
         if computed_height is not None:
@@ -84,10 +139,11 @@ def get_image_html(
 
         w_attr = img_w
         h_attr = img_h
+        
         if _parse_px(computed_width) is not None:
             w_attr = int(round(_parse_px(computed_width)))
         if _parse_px(computed_height) is not None:
-            h_attr = int(round(_parse_px(computed_height))) 
+            h_attr = int(round(_parse_px(computed_height)))
 
         html_text = (
             f'<img src="data:image/png;base64,{b64}" '
@@ -95,23 +151,55 @@ def get_image_html(
             f'width="{w_attr}" height="{h_attr}" '
             f'style="{style_attr}" />'
         )
-        return html_text
+        return mo.Html(html_text)
 
     if mode == "file_src":
-        if computed_height is None:
-            return mo.image(src=path, width=computed_width, rounded=rounded)
+        # URL ならブラウザが直接取れるので <img src="..."> でOK
+        if url is not None:
+            style_parts = ["max-width:none"]
+            if computed_height is None:
+                style_parts.append("height:auto")
+            if computed_width is not None:
+                style_parts.append(f"width:{_to_css_size(computed_width)}")
+            if computed_height is not None:
+                style_parts.append(f"height:{_to_css_size(computed_height)}")
+            if rounded:
+                style_parts.append(f"border-radius:{round_radius}")
+                style_parts.append("overflow:hidden")
 
-        style = []
+            style_attr = "; ".join(style_parts)
+
+            html_text = (
+                f'<img src="{html.escape(url)}" '
+                f'alt="{alt_escaped}" '
+                f'style="{style_attr}" />'
+            )
+            return mo.Html(html_text)
+
+        # Path はブラウザが直接読めないので mo.image に任せる
+        assert path is not None
+        inner = mo.image(src=path, rounded=False)  # marimo に配信/埋め込みをやらせる
+        img_html = inner.text
+
+        # ここで「勝手に 100% 幅になる」系を上書きする
+        style_parts = ["max-width:none", "width:auto", "height:auto", "display:inline-block"]
         if computed_width is not None:
-            style.append(f"width:{_to_css_size(computed_width)}")
+            style_parts.append(f"width:{_to_css_size(computed_width)}")
         if computed_height is not None:
-            style.append(f"height:{_to_css_size(computed_height)}")
+            style_parts.append(f"height:{_to_css_size(computed_height)}")
         if rounded:
-            style.append(f"border-radius:{round_radius}; overflow:hidden")
-        style_attr = "; ".join(style)
+            style_parts.append(f"border-radius:{round_radius}")
 
-        inner = mo.image(src=path, rounded=False)
-        return mo.Html(f'<div style="{style_attr}">{inner.text}</div>')
+        inject = "; ".join(style_parts)
+
+        # 既に style がある場合は追記、無ければ追加
+        if ' style="' in img_html:
+            img_html = re.sub(r'style="', f'style="{inject}; ', img_html, count=1)
+        else:
+            img_html = img_html.replace("<img ", f'<img style="{inject}" ', 1)
+
+        return mo.Html(img_html)
+
 
     raise ValueError(f"未知の mode: {mode!r}")
 

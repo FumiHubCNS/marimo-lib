@@ -1,3 +1,13 @@
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "marimo-lib",
+# ]
+# 
+# [tool.uv.sources]
+# marimo-lib = { git = "https://github.com/FumiHubCNS/marimo-lib" }
+# ///
+
 import marimo
 
 __generated_with = "0.17.7"

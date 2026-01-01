@@ -1,3 +1,4 @@
+from __future__ import annotations
 import plotly
 import plotly.express as px
 import pandas as pd
@@ -5,6 +6,9 @@ import datetime as dt
 import plotly.graph_objects as go
 from typing import Any
 import os 
+from urllib.parse import urlparse
+from urllib.request import Request, urlopen
+
 
 def get_color_list(label: str = "tokyo", alpha: float = 0.6):
     color_list = []
@@ -281,30 +285,40 @@ def add_schedule(
     )
 
 
-def load_schedule_file_as_str(input_path:str =  "filepath") -> str:
+def load_schedule_file_as_str(input_path: str = "filepath") -> str:
     """
-    ファイルを読み込む関数
+    Load file or URL as text (utf-8).
 
-    Load file.
-
-    Parameters
-    ----------
-    input_path : 
-        Input file path 
-
-    Returns
-    -------
-    str: 
-        String型に格納されたテキスト
+    - local file: open() で読む
+    - URL(http/https): urlopen() で読む
+    - それ以外/失敗: "" を返す
     """
-    if os.path.isfile(input_path) is True:
-        with open(input_path, "r", encoding="utf-8") as f:
-            txt = f.read()
+    # 1) URL判定（http/httpsのみ）
+    try:
+        p = urlparse(input_path)
+        is_url = p.scheme in ("http", "https")
+    except Exception:
+        is_url = False
 
-        return txt
-    
-    else:
-        return ""
+    if is_url:
+        try:
+            # GitHubの "blob" はHTMLなので注意（raw URL推奨）
+            req = Request(input_path, headers={"User-Agent": "Mozilla/5.0"})
+            with urlopen(req, timeout=15) as r:
+                # 文字コードは基本utf-8、ダメならreplace
+                return r.read().decode("utf-8", errors="replace")
+        except Exception:
+            return ""
+
+    # 2) ローカルファイル
+    if os.path.isfile(input_path):
+        try:
+            with open(input_path, "r", encoding="utf-8", errors="replace") as f:
+                return f.read()
+        except Exception:
+            return ""
+
+    return ""
     
 
 def parse_schedule_txt(txt:str | None = None) -> list[dict[any, any]]:

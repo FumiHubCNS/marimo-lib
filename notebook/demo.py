@@ -1,3 +1,13 @@
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "marimo-lib",
+# ]
+# 
+# [tool.uv.sources]
+# marimo-lib = { git = "https://github.com/FumiHubCNS/marimo-lib" }
+# ///
+
 import marimo
 
 __generated_with = "0.17.7"
@@ -34,13 +44,19 @@ def _(mo):
 def _():
     import marimo as mo
 
-    GLOBAL_FIG_WIDTH:int = 1250
+    GLOBAL_FIG_WIDTH:int = 1200
     return GLOBAL_FIG_WIDTH, mo
 
 
 @app.cell
 def _(mo):
-    html_test = molib.image.get_image_html("notebook/figs/logotype-wide.png")
+    input_path = Path("notebook/figs/logotype-wide.png")
+    path_mode = "file_src"
+    if not input_path.exists():
+        input_path = 'https://raw.githubusercontent.com/FumiHubCNS/marimo-lib/main/notebook/figs/logotype-wide.png'
+        path_mode = "data_url"
+
+    html_test = molib.image.get_image_html(input_path, mode=path_mode)
 
     mo.vstack([
         mo.md(
@@ -52,13 +68,13 @@ def _(mo):
             図の描画に関する関数群。
             最終的にはHTMLで保存を行いたいので図を挿入する際はマークダウン記法で書かず`base64`にてHTMLテキストにして変数に格納する。
 
-            `mo.Html(html_test)`にて描画
+            戻り値は`mo.Html()`なのでそのまま指定すること描画可能
 
             <br>
 
             """
         ),
-        mo.Html(html_test)
+        html_test
     ])
     return
 
@@ -199,6 +215,11 @@ def _(GLOBAL_FIG_WIDTH: int, fig, mo):
 
 @app.cell
 def _(mo):
+    csv_path = Path("notebook/data/schedule.csv")
+
+    if not csv_path.exists():
+        csv_path = "https://raw.githubusercontent.com/FumiHubCNS/marimo-lib/main/notebook/data/schedule.csv"
+
     schedule = molib.schedule.init_schedule()
 
     molib.schedule.add_periodic_task(
@@ -277,10 +298,9 @@ def _(mo):
 
     molib.schedule.add_task_csv(
         data=schedule,
-        input_path="notebook/data/schedule.csv",
+        input_path=csv_path,
         func_label="func",
     )
-
 
     values = schedule["resource"].unique().tolist()
 
