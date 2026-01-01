@@ -79,7 +79,7 @@ def _():
     _x = np.linspace(-15,15,100)
     _y = np.linspace(-15,15,100)
 
-    _h = np.random.normal(loc=0, scale=3, size=1000000)
+    _h = np.random.normal(loc=0, scale=3, size=10000)
 
     molib.plot.add_sub_plot(_fig, 1, 1, data=[_h], func=molib.plot.go_Histogram, dataname="sample1")
     molib.plot.add_sub_plot(_fig, 1, 2, data=[_x,_y], func=molib.plot.go_Bar)
