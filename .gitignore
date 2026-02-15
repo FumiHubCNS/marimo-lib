@@ -11,3 +11,8 @@ wheels/
 .venv
 
 src/develop
+src/page
+
+# home page
+page
+

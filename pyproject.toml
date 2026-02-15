@@ -24,3 +24,9 @@ build-backend = "hatchling.build"
 
 [tool.marimo.runtime]
 output_max_bytes = 50_000_000
+
+[dependency-groups]
+dev = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.7.1",
+]
