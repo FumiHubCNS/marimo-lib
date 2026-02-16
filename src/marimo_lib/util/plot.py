@@ -767,8 +767,8 @@ def add_sub_plot(
 
 def get_scatter_from_1d(
     data:list | None = None,
-    bin_val:list | None = None,
-    range_val:list | None = None,
+    bin:list | None = None,
+    range:list | None = None,
 ):
     """
     1次元ヒストグラムから散布図用のデータを取得する関数
@@ -779,10 +779,10 @@ def get_scatter_from_1d(
     ----------
     data : 
         Data list (format depends on func)
-    bin_val : 
+    bin : 
         Bin number
-    range_val : 
-        Valid range [min, max] 
+    range : [min, max] 
+        Valid range for data
     
     Returns
     -------
@@ -792,17 +792,17 @@ def get_scatter_from_1d(
     if data is None:
         raise ValueError("data must be a list")
 
-    bin_val = bin_val if bin_val is not None else 200
+    bin = bin if bin is not None else 200
 
-    if range_val is None:
+    if range is None:
         min_val = min(data)
         max_val = max(data)
 
     else:
-        min_val = min(range_val)
-        max_val = max(range_val)
+        min_val = min(range)
+        max_val = max(range)
 
-    bin_edges = np.linspace(min_val, max_val, bin_val)
+    bin_edges = np.linspace(min_val, max_val, bin)
     counts, _ = np.histogram(data, bins=bin_edges)
     bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
 

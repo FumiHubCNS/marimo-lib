@@ -37,4 +37,4 @@ dev = [
 
 [tool.taskipy.tasks]
 mkdocs = """ mkdir -p page/docs/examples && rm -rf page/docs/examples/* && cp -R notebook/__marimo__/* page/docs/examples/ && mkdocs build -v -f page/mkdocs.yml"""
-pdoc = """rm -rf docs/marimo-lib && pdoc marimo_lib --output-directory docs/marimo-lib --math --docformat google"""
+pdoc = """rm -rf docs/marimo-lib && pdoc marimo_lib.util marimo_lib.analysis --output-directory docs/marimo-lib --math --docformat google"""

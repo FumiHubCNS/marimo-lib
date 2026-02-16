@@ -132,7 +132,7 @@
     <main class="pdoc">
             <section class="module-info">
                     <h1 class="modulename">
-<a href="./../../marimo_lib.html">marimo_lib</a><wbr>.<a href="./../util.html">util</a><wbr>.plot    </h1>
+marimo_lib<wbr>.<a href="./../util.html">util</a><wbr>.plot    </h1>
 
                 
                         <input id="mod-plot-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
@@ -908,8 +908,8 @@
 </span><span id="L-767"><a href="#L-767"><span class="linenos"> 767</span></a>
 </span><span id="L-768"><a href="#L-768"><span class="linenos"> 768</span></a><span class="k">def</span><span class="w"> </span><span class="nf">get_scatter_from_1d</span><span class="p">(</span>
 </span><span id="L-769"><a href="#L-769"><span class="linenos"> 769</span></a>    <span class="n">data</span><span class="p">:</span><span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="L-770"><a href="#L-770"><span class="linenos"> 770</span></a>    <span class="n">bin_val</span><span class="p">:</span><span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="L-771"><a href="#L-771"><span class="linenos"> 771</span></a>    <span class="n">range_val</span><span class="p">:</span><span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-770"><a href="#L-770"><span class="linenos"> 770</span></a>    <span class="nb">bin</span><span class="p">:</span><span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-771"><a href="#L-771"><span class="linenos"> 771</span></a>    <span class="nb">range</span><span class="p">:</span><span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="L-772"><a href="#L-772"><span class="linenos"> 772</span></a><span class="p">):</span>
 </span><span id="L-773"><a href="#L-773"><span class="linenos"> 773</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-774"><a href="#L-774"><span class="linenos"> 774</span></a><span class="sd">    1次元ヒストグラムから散布図用のデータを取得する関数</span>
@@ -920,10 +920,10 @@
 </span><span id="L-779"><a href="#L-779"><span class="linenos"> 779</span></a><span class="sd">    ----------</span>
 </span><span id="L-780"><a href="#L-780"><span class="linenos"> 780</span></a><span class="sd">    data : </span>
 </span><span id="L-781"><a href="#L-781"><span class="linenos"> 781</span></a><span class="sd">        Data list (format depends on func)</span>
-</span><span id="L-782"><a href="#L-782"><span class="linenos"> 782</span></a><span class="sd">    bin_val : </span>
+</span><span id="L-782"><a href="#L-782"><span class="linenos"> 782</span></a><span class="sd">    bin : </span>
 </span><span id="L-783"><a href="#L-783"><span class="linenos"> 783</span></a><span class="sd">        Bin number</span>
-</span><span id="L-784"><a href="#L-784"><span class="linenos"> 784</span></a><span class="sd">    range_val : </span>
-</span><span id="L-785"><a href="#L-785"><span class="linenos"> 785</span></a><span class="sd">        Valid range [min, max] </span>
+</span><span id="L-784"><a href="#L-784"><span class="linenos"> 784</span></a><span class="sd">    range : [min, max] </span>
+</span><span id="L-785"><a href="#L-785"><span class="linenos"> 785</span></a><span class="sd">        Valid range for data</span>
 </span><span id="L-786"><a href="#L-786"><span class="linenos"> 786</span></a><span class="sd">    </span>
 </span><span id="L-787"><a href="#L-787"><span class="linenos"> 787</span></a><span class="sd">    Returns</span>
 </span><span id="L-788"><a href="#L-788"><span class="linenos"> 788</span></a><span class="sd">    -------</span>
@@ -933,17 +933,17 @@
 </span><span id="L-792"><a href="#L-792"><span class="linenos"> 792</span></a>    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="L-793"><a href="#L-793"><span class="linenos"> 793</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;data must be a list&quot;</span><span class="p">)</span>
 </span><span id="L-794"><a href="#L-794"><span class="linenos"> 794</span></a>
-</span><span id="L-795"><a href="#L-795"><span class="linenos"> 795</span></a>    <span class="n">bin_val</span> <span class="o">=</span> <span class="n">bin_val</span> <span class="k">if</span> <span class="n">bin_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">200</span>
+</span><span id="L-795"><a href="#L-795"><span class="linenos"> 795</span></a>    <span class="nb">bin</span> <span class="o">=</span> <span class="nb">bin</span> <span class="k">if</span> <span class="nb">bin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">200</span>
 </span><span id="L-796"><a href="#L-796"><span class="linenos"> 796</span></a>
-</span><span id="L-797"><a href="#L-797"><span class="linenos"> 797</span></a>    <span class="k">if</span> <span class="n">range_val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-797"><a href="#L-797"><span class="linenos"> 797</span></a>    <span class="k">if</span> <span class="nb">range</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="L-798"><a href="#L-798"><span class="linenos"> 798</span></a>        <span class="n">min_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </span><span id="L-799"><a href="#L-799"><span class="linenos"> 799</span></a>        <span class="n">max_val</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </span><span id="L-800"><a href="#L-800"><span class="linenos"> 800</span></a>
 </span><span id="L-801"><a href="#L-801"><span class="linenos"> 801</span></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="L-802"><a href="#L-802"><span class="linenos"> 802</span></a>        <span class="n">min_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">range_val</span><span class="p">)</span>
-</span><span id="L-803"><a href="#L-803"><span class="linenos"> 803</span></a>        <span class="n">max_val</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">range_val</span><span class="p">)</span>
+</span><span id="L-802"><a href="#L-802"><span class="linenos"> 802</span></a>        <span class="n">min_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">range</span><span class="p">)</span>
+</span><span id="L-803"><a href="#L-803"><span class="linenos"> 803</span></a>        <span class="n">max_val</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">range</span><span class="p">)</span>
 </span><span id="L-804"><a href="#L-804"><span class="linenos"> 804</span></a>
-</span><span id="L-805"><a href="#L-805"><span class="linenos"> 805</span></a>    <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span><span class="p">,</span> <span class="n">bin_val</span><span class="p">)</span>
+</span><span id="L-805"><a href="#L-805"><span class="linenos"> 805</span></a>    <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span><span class="p">,</span> <span class="nb">bin</span><span class="p">)</span>
 </span><span id="L-806"><a href="#L-806"><span class="linenos"> 806</span></a>    <span class="n">counts</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bin_edges</span><span class="p">)</span>
 </span><span id="L-807"><a href="#L-807"><span class="linenos"> 807</span></a>    <span class="n">bin_centers</span> <span class="o">=</span> <span class="p">(</span><span class="n">bin_edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bin_edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
 </span><span id="L-808"><a href="#L-808"><span class="linenos"> 808</span></a>
@@ -2662,7 +2662,7 @@ func :
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">get_scatter_from_1d</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">data</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">bin_val</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">range_val</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">):</span></span>
+        <span class="name">get_scatter_from_1d</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">data</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="nb">bin</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="nb">range</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">):</span></span>
 
                 <label class="view-source-button" for="get_scatter_from_1d-view-source"><span>View Source</span></label>
 
@@ -2670,8 +2670,8 @@ func :
     <a class="headerlink" href="#get_scatter_from_1d"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="get_scatter_from_1d-769"><a href="#get_scatter_from_1d-769"><span class="linenos">769</span></a><span class="k">def</span><span class="w"> </span><span class="nf">get_scatter_from_1d</span><span class="p">(</span>
 </span><span id="get_scatter_from_1d-770"><a href="#get_scatter_from_1d-770"><span class="linenos">770</span></a>    <span class="n">data</span><span class="p">:</span><span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="get_scatter_from_1d-771"><a href="#get_scatter_from_1d-771"><span class="linenos">771</span></a>    <span class="n">bin_val</span><span class="p">:</span><span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="get_scatter_from_1d-772"><a href="#get_scatter_from_1d-772"><span class="linenos">772</span></a>    <span class="n">range_val</span><span class="p">:</span><span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="get_scatter_from_1d-771"><a href="#get_scatter_from_1d-771"><span class="linenos">771</span></a>    <span class="nb">bin</span><span class="p">:</span><span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="get_scatter_from_1d-772"><a href="#get_scatter_from_1d-772"><span class="linenos">772</span></a>    <span class="nb">range</span><span class="p">:</span><span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="get_scatter_from_1d-773"><a href="#get_scatter_from_1d-773"><span class="linenos">773</span></a><span class="p">):</span>
 </span><span id="get_scatter_from_1d-774"><a href="#get_scatter_from_1d-774"><span class="linenos">774</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="get_scatter_from_1d-775"><a href="#get_scatter_from_1d-775"><span class="linenos">775</span></a><span class="sd">    1次元ヒストグラムから散布図用のデータを取得する関数</span>
@@ -2682,10 +2682,10 @@ func :
 </span><span id="get_scatter_from_1d-780"><a href="#get_scatter_from_1d-780"><span class="linenos">780</span></a><span class="sd">    ----------</span>
 </span><span id="get_scatter_from_1d-781"><a href="#get_scatter_from_1d-781"><span class="linenos">781</span></a><span class="sd">    data : </span>
 </span><span id="get_scatter_from_1d-782"><a href="#get_scatter_from_1d-782"><span class="linenos">782</span></a><span class="sd">        Data list (format depends on func)</span>
-</span><span id="get_scatter_from_1d-783"><a href="#get_scatter_from_1d-783"><span class="linenos">783</span></a><span class="sd">    bin_val : </span>
+</span><span id="get_scatter_from_1d-783"><a href="#get_scatter_from_1d-783"><span class="linenos">783</span></a><span class="sd">    bin : </span>
 </span><span id="get_scatter_from_1d-784"><a href="#get_scatter_from_1d-784"><span class="linenos">784</span></a><span class="sd">        Bin number</span>
-</span><span id="get_scatter_from_1d-785"><a href="#get_scatter_from_1d-785"><span class="linenos">785</span></a><span class="sd">    range_val : </span>
-</span><span id="get_scatter_from_1d-786"><a href="#get_scatter_from_1d-786"><span class="linenos">786</span></a><span class="sd">        Valid range [min, max] </span>
+</span><span id="get_scatter_from_1d-785"><a href="#get_scatter_from_1d-785"><span class="linenos">785</span></a><span class="sd">    range : [min, max] </span>
+</span><span id="get_scatter_from_1d-786"><a href="#get_scatter_from_1d-786"><span class="linenos">786</span></a><span class="sd">        Valid range for data</span>
 </span><span id="get_scatter_from_1d-787"><a href="#get_scatter_from_1d-787"><span class="linenos">787</span></a><span class="sd">    </span>
 </span><span id="get_scatter_from_1d-788"><a href="#get_scatter_from_1d-788"><span class="linenos">788</span></a><span class="sd">    Returns</span>
 </span><span id="get_scatter_from_1d-789"><a href="#get_scatter_from_1d-789"><span class="linenos">789</span></a><span class="sd">    -------</span>
@@ -2695,17 +2695,17 @@ func :
 </span><span id="get_scatter_from_1d-793"><a href="#get_scatter_from_1d-793"><span class="linenos">793</span></a>    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="get_scatter_from_1d-794"><a href="#get_scatter_from_1d-794"><span class="linenos">794</span></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;data must be a list&quot;</span><span class="p">)</span>
 </span><span id="get_scatter_from_1d-795"><a href="#get_scatter_from_1d-795"><span class="linenos">795</span></a>
-</span><span id="get_scatter_from_1d-796"><a href="#get_scatter_from_1d-796"><span class="linenos">796</span></a>    <span class="n">bin_val</span> <span class="o">=</span> <span class="n">bin_val</span> <span class="k">if</span> <span class="n">bin_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">200</span>
+</span><span id="get_scatter_from_1d-796"><a href="#get_scatter_from_1d-796"><span class="linenos">796</span></a>    <span class="nb">bin</span> <span class="o">=</span> <span class="nb">bin</span> <span class="k">if</span> <span class="nb">bin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">200</span>
 </span><span id="get_scatter_from_1d-797"><a href="#get_scatter_from_1d-797"><span class="linenos">797</span></a>
-</span><span id="get_scatter_from_1d-798"><a href="#get_scatter_from_1d-798"><span class="linenos">798</span></a>    <span class="k">if</span> <span class="n">range_val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="get_scatter_from_1d-798"><a href="#get_scatter_from_1d-798"><span class="linenos">798</span></a>    <span class="k">if</span> <span class="nb">range</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="get_scatter_from_1d-799"><a href="#get_scatter_from_1d-799"><span class="linenos">799</span></a>        <span class="n">min_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </span><span id="get_scatter_from_1d-800"><a href="#get_scatter_from_1d-800"><span class="linenos">800</span></a>        <span class="n">max_val</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </span><span id="get_scatter_from_1d-801"><a href="#get_scatter_from_1d-801"><span class="linenos">801</span></a>
 </span><span id="get_scatter_from_1d-802"><a href="#get_scatter_from_1d-802"><span class="linenos">802</span></a>    <span class="k">else</span><span class="p">:</span>
-</span><span id="get_scatter_from_1d-803"><a href="#get_scatter_from_1d-803"><span class="linenos">803</span></a>        <span class="n">min_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">range_val</span><span class="p">)</span>
-</span><span id="get_scatter_from_1d-804"><a href="#get_scatter_from_1d-804"><span class="linenos">804</span></a>        <span class="n">max_val</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">range_val</span><span class="p">)</span>
+</span><span id="get_scatter_from_1d-803"><a href="#get_scatter_from_1d-803"><span class="linenos">803</span></a>        <span class="n">min_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">range</span><span class="p">)</span>
+</span><span id="get_scatter_from_1d-804"><a href="#get_scatter_from_1d-804"><span class="linenos">804</span></a>        <span class="n">max_val</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">range</span><span class="p">)</span>
 </span><span id="get_scatter_from_1d-805"><a href="#get_scatter_from_1d-805"><span class="linenos">805</span></a>
-</span><span id="get_scatter_from_1d-806"><a href="#get_scatter_from_1d-806"><span class="linenos">806</span></a>    <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span><span class="p">,</span> <span class="n">bin_val</span><span class="p">)</span>
+</span><span id="get_scatter_from_1d-806"><a href="#get_scatter_from_1d-806"><span class="linenos">806</span></a>    <span class="n">bin_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span><span class="p">,</span> <span class="nb">bin</span><span class="p">)</span>
 </span><span id="get_scatter_from_1d-807"><a href="#get_scatter_from_1d-807"><span class="linenos">807</span></a>    <span class="n">counts</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bin_edges</span><span class="p">)</span>
 </span><span id="get_scatter_from_1d-808"><a href="#get_scatter_from_1d-808"><span class="linenos">808</span></a>    <span class="n">bin_centers</span> <span class="o">=</span> <span class="p">(</span><span class="n">bin_edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bin_edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
 </span><span id="get_scatter_from_1d-809"><a href="#get_scatter_from_1d-809"><span class="linenos">809</span></a>
@@ -2721,10 +2721,10 @@ func :
 
 <p>data : 
     Data list (format depends on func)
-bin_val : 
+bin : 
     Bin number
-range_val : 
-    Valid range [min, max] </p>
+range : [min, max] 
+    Valid range for data</p>
 
 <h2 id="returns">Returns</h2>
 
