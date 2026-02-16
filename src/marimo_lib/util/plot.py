@@ -491,7 +491,7 @@ def get_np_histogram2d(
 
     return counts, xedges, yedges
 
-def slice_1d_from_2dhist(
+def slice_1d_from_2d(
     counts: np.ndarray,
     xedges: np.ndarray,
     yedges: np.ndarray,
@@ -645,7 +645,7 @@ def get_slice_array(
 
     for i in range(max_loop):
         bin_index = i * bin_span
-        data1d = slice_1d_from_2dhist(
+        data1d = slice_1d_from_2d(
                 *data2d, 
                 bin_index=bin_index,
                 slice_axis=slice_axis,
@@ -763,6 +763,50 @@ def add_sub_plot(
                 ),
                 margin=dict(r = legend_option[5])               
         )
+
+
+def get_scatter_from_1d(
+    data:list | None = None,
+    bin_val:list | None = None,
+    range_val:list | None = None,
+):
+    """
+    1次元ヒストグラムから散布図用のデータを取得する関数
+
+    Function to get scatter plot data from 1D histogram
+
+    Parameters
+    ----------
+    data : 
+        Data list (format depends on func)
+    bin_val : 
+        Bin number
+    range_val : 
+        Valid range [min, max] 
+    
+    Returns
+    -------
+    bin_centers, counts:
+        Tuple of bin centers and counts for scatter plot
+    """ 
+    if data is None:
+        raise ValueError("data must be a list")
+
+    bin_val = bin_val if bin_val is not None else 200
+
+    if range_val is None:
+        min_val = min(data)
+        max_val = max(data)
+
+    else:
+        min_val = min(range_val)
+        max_val = max(range_val)
+
+    bin_edges = np.linspace(min_val, max_val, bin_val)
+    counts, _ = np.histogram(data, bins=bin_edges)
+    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+    return bin_centers, counts
 
 
 def go_Histogram(

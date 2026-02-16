@@ -10,8 +10,8 @@
 
 import marimo
 
-__generated_with = "0.17.7"
-app = marimo.App(width="full", auto_download=["html"])
+__generated_with = "0.19.9"
+app = marimo.App(width="medium", auto_download=["html"])
 
 with app.setup:
     # Initialization code that runs before all other cells

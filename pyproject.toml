@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
+    "anywidget>=0.9.21",
     "json5>=0.12.1",
     "marimo>=0.17.7",
     "mohtml>=0.1.11",
@@ -16,6 +17,7 @@ dependencies = [
     "pillow>=12.0.0",
     "plotly>=6.4.0",
     "pyzmq>=27.1.0",
+    "scipy>=1.15.3",
 ]
 
 [build-system]
@@ -29,4 +31,10 @@ output_max_bytes = 50_000_000
 dev = [
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.7.1",
+    "pdoc>=16.0.0",
+    "taskipy>=1.14.1",
 ]
+
+[tool.taskipy.tasks]
+mkdocs = """ mkdir -p page/docs/examples && rm -rf page/docs/examples/* && cp -R notebook/__marimo__/* page/docs/examples/ && mkdocs build -v -f page/mkdocs.yml"""
+pdoc = """rm -rf docs/marimo-lib && pdoc marimo_lib --output-directory docs/marimo-lib --math --docformat google"""

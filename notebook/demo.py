@@ -1,18 +1,20 @@
 # /// script
 # requires-python = ">=3.10"
 # dependencies = [
+#     "anywidget==0.9.21",
+#     "marimo",
 #     "marimo-lib",
 # ]
-# 
+#
 # [tool.uv.sources]
 # marimo-lib = { git = "https://github.com/FumiHubCNS/marimo-lib" }
 # ///
 
 import marimo
 
-__generated_with = "0.17.7"
+__generated_with = "0.19.11"
 app = marimo.App(
-    width="full",
+    width="medium",
     layout_file="layouts/demo.slides.json",
     auto_download=["html"],
 )
@@ -24,7 +26,6 @@ with app.setup:
     import random
     import numpy as np
     import pandas as pd
-    from modraw import Draw
     from mohtml import img
     from pathlib import Path
     import base64
@@ -44,7 +45,7 @@ def _(mo):
 def _():
     import marimo as mo
 
-    GLOBAL_FIG_WIDTH:int = 1200
+    GLOBAL_FIG_WIDTH:int = 1000
     return GLOBAL_FIG_WIDTH, mo
 
 
@@ -339,8 +340,24 @@ def _(GLOBAL_FIG_WIDTH: int, mo, schedule, values):
 
     fill_map = dict(zip(values, fill_palette))
     edge_map = dict(zip(values, edge_palette))
+
     line_map = dict(color=molib.schedule.get_color_list('tokyo',0.8)[0], width=2, dash="dot")
     taskname_map = dict(size=14, color="#000000")
+
+    ## 描画用にスケジュールをシフトする。
+    cols = ["start", "end"]
+
+    for col in cols:
+        s = pd.to_datetime(schedule[col], errors="coerce")
+        med = s.median()
+    
+        target = pd.Timestamp.today().normalize() + (med - med.normalize())
+        delta = target - med
+    
+        schedule[col] = s + delta
+        schedule[col] = pd.to_datetime(schedule[col]).dt.strftime("%Y-%m-%d %H:%M")
+
+
     _fig = make_subplots(rows=1, cols=1, vertical_spacing=0.15, horizontal_spacing=0.15, subplot_titles=([""]))
 
     molib.schedule.add_schedule(
@@ -375,8 +392,7 @@ def _(GLOBAL_FIG_WIDTH: int, mo, schedule, values):
 
 @app.cell
 def _(GLOBAL_FIG_WIDTH: int, mo):
-    widget_tl = mo.ui.anywidget(Draw(width=int(GLOBAL_FIG_WIDTH/2), height=600))
-    widget_ex = molib.excalidraw.ExcalidrawWidget(width=int(GLOBAL_FIG_WIDTH/2), height=600)
+    widget_ex = molib.excalidraw.ExcalidrawWidget(width=int(GLOBAL_FIG_WIDTH), height=600)
 
     mo.vstack([
         mo.md(
@@ -385,13 +401,10 @@ def _(GLOBAL_FIG_WIDTH: int, mo):
 
             - スライドや議事録用ノートとしてGUI上で図形を配置したり、文字書いたりするのは重要
             - Draw.ioがあると良いが対応していない。
-            - `modarw`や`excalidraw`などがある
+            - `excalidraw`は対応させた
             """
         ),
-        mo.hstack([
-            widget_tl,
-            widget_ex
-        ]),
+        widget_ex
     ])
     return
 
