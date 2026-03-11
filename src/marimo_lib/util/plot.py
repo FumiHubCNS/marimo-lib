@@ -15,6 +15,7 @@ import os
 import time
 from typing import Callable
 import inspect
+from plotly.subplots import make_subplots
 
 pio.renderers.default = "browser"
 
@@ -655,6 +656,58 @@ def get_slice_array(
         histo_array.append(data1d)
 
     return histo_array
+
+
+def get_subplots_object(
+    rows: int = 1,
+    cols: int = 2,
+    vertical_spacing: float = 0.15,
+    horizontal_spacing: float = 0.15,
+    subplot_titles: Optional[List[str]] = None,
+    **kwargs: Any,
+) -> go.Figure:
+    """
+    plotly.subplots.make_subplots を呼び出す関数
+    Function to call plotly.subplots.make_subplots
+
+    Parameters
+    ----------
+    rows :  
+        Number of rows in the subplot grid
+    cols :
+        Number of columns in the subplot grid
+    vertical_spacing : 
+        Vertical spacing between subplots (0 to 1)
+    horizontal_spacing :
+        Horizontal spacing between subplots (0 to 1)
+    subplot_titles :
+        List of titles for each subplot (optional)
+
+    Returns 
+    -------
+    fig : 
+        Instance of plotly.graph_objects.Figure with subplots
+    """
+    if subplot_titles is None:
+        subplot_titles = []
+        for i in range(rows * cols):
+            subplot_titles.append(f"Subplot {i+1}")
+
+    if subplot_titles is not None and len(subplot_titles) != rows * cols:
+        for i in range(len(subplot_titles), rows * cols):
+            subplot_titles.append(f"Subplot {i+1}")
+    
+    fig = make_subplots(
+        rows=rows,
+        cols=cols,
+        vertical_spacing=vertical_spacing,
+        horizontal_spacing=horizontal_spacing,
+        subplot_titles=subplot_titles,
+        **kwargs,
+    )
+
+    return fig
+
 
 
 def add_sub_plot(
