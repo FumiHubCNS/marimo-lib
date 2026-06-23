@@ -922,8 +922,9 @@ def go_Heatmap(
     data:list,
     bins:list[int,int] | None = None,
     logz_option:bool = False,
-    xrange:list[int,int] | None = None,
-    yrange:list[int,int] | None = None,
+    xrange:list[int | float, int | float] | None = None,
+    yrange:list[int | float, int | float] | None = None,
+    zrange:list[int | float, int | float] | None = None,
     debug:bool = False,
     dataname:str | None = None,
     colormap:str = "Turbo"
@@ -951,6 +952,8 @@ def go_Heatmap(
         Valid range for x direction
     yrange : [min, max] 
         Valid range for y direction
+    zrange : [min, max] 
+        Valid range for z direction
     debug :
         Debug flag
     dataname :
@@ -970,16 +973,30 @@ def go_Heatmap(
     xcenters = 0.5 * (xedges[:-1] + xedges[1:])
     ycenters = 0.5 * (yedges[:-1] + yedges[1:])
 
-    heatmap = go.Heatmap(
-        x=xcenters,
-        y=ycenters,
-        z=counts.T,
-        colorscale=colormap,
-        colorbar=dict(
-            title=bar_title
-        ),
-        name=dataname
-    )
+    if zrange is not None:
+        heatmap = go.Heatmap(
+            x=xcenters,
+            y=ycenters,
+            z=counts.T,
+            colorscale=colormap,
+            zmin = zrange[0],
+            zmax = zrange[1],
+            colorbar=dict(
+                title=bar_title
+            ),
+            name=dataname
+        )
+    else:
+        heatmap = go.Heatmap(
+            x=xcenters,
+            y=ycenters,
+            z=counts.T,
+            colorscale=colormap,
+            colorbar=dict(
+                title=bar_title
+            ),
+            name=dataname
+        )
     
     fig.add_trace(heatmap, row=irow, col=icol)
 
@@ -1024,6 +1041,9 @@ def go_Scatter(
     bar_width:int = 1,
     dataname:str | None = None,
     color:str | None = None,
+    marker_style:str | None = 'circle',
+    line_style:str | None = 'solid',
+    opacity:float | None = 1.0,
     y_error:list | None = None,
     x_error:list | None = None,
     errors_type:str = 'data',
@@ -1056,8 +1076,16 @@ def go_Scatter(
         Error bar width
     dataneme :
         Data object label name
-    color
+    color :
         Data color
+    marker_style :
+        Marker symbol style.
+        (e.g.) 'circle', 'square', 'diamond', 'cross' ...
+    line_style :
+        Line style
+    opacity :
+        Marker opacity.
+        (e.g.) 0.5
     y_error :
         Error bar data for y axis
     x_error :
@@ -1113,8 +1141,17 @@ def go_Scatter(
             go.Scatter(
                 y = data[0],
                 mode =  mode,
-                marker = dict(size = size, color = color),
-                line = dict(width = width, color = color),
+                marker = dict(
+                    size = size, 
+                    color = color,
+                    opacity = opacity,
+                    symbol = marker_style,
+                    ),
+                line = dict(
+                    width = width,
+                    color = color,
+                    dash = line_style,
+                ),
                 name = dataname,
                 error_y = error_y,
                 error_x = error_x 
@@ -1127,8 +1164,17 @@ def go_Scatter(
                 x = data[0],
                 y = data[1],
                 mode =  mode,
-                marker = dict(size = size, color = color),
-                line = dict(width = width, color = color),
+                marker = dict(
+                    size = size, 
+                    color = color,
+                    opacity = opacity,
+                    symbol = marker_style
+                    ),
+                line = dict(
+                    width = width,
+                    color = color,
+                    dash=line_style,
+                ),
                 name = dataname,
                 error_y = error_y,
                 error_x = error_x 

@@ -10,7 +10,7 @@
 
 import marimo
 
-__generated_with = "0.19.9"
+__generated_with = "0.23.10"
 app = marimo.App(width="medium", auto_download=["html"])
 
 with app.setup:
@@ -164,6 +164,11 @@ def _():
     molib.plot.add_sub_plot(_fig, 2, 2, data=[_x,_y],func=molib.plot.go_Scatter, y_error=[_eu, _ed], color='black')
 
     _fig.update_layout(height=600, width=1000, showlegend=False, title_text="scatter plots")
+    return
+
+
+@app.cell
+def _():
     return
 
 

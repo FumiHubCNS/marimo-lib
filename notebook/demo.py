@@ -12,7 +12,7 @@
 
 import marimo
 
-__generated_with = "0.19.11"
+__generated_with = "0.23.10"
 app = marimo.App(
     width="medium",
     layout_file="layouts/demo.slides.json",
@@ -350,10 +350,10 @@ def _(GLOBAL_FIG_WIDTH: int, mo, schedule, values):
     for col in cols:
         s = pd.to_datetime(schedule[col], errors="coerce")
         med = s.median()
-    
+
         target = pd.Timestamp.today().normalize() + (med - med.normalize())
         delta = target - med
-    
+
         schedule[col] = s + delta
         schedule[col] = pd.to_datetime(schedule[col]).dt.strftime("%Y-%m-%d %H:%M")
 
