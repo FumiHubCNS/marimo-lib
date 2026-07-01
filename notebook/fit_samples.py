@@ -11,7 +11,7 @@
 
 import marimo
 
-__generated_with = "0.19.9"
+__generated_with = "0.23.9"
 app = marimo.App(
     width="medium",
     layout_file="layouts/fit_samples.slides.json",
@@ -22,6 +22,7 @@ with app.setup:
     # Initialization code that runs before all other cells
     import marimo_lib.util as molib
     import marimo_lib.analysis as moana
+    import marimo_lib.converter as conv
     from plotly.subplots import make_subplots
     import random
     import numpy as np
@@ -184,6 +185,11 @@ def _(GLOBAL_FIG_WIDTH: int):
     molib.plot.align_colorbar(_fig, 20)
 
     _fig.update_layout(height=500, width=GLOBAL_FIG_WIDTH, showlegend=True)
+    return
+
+
+@app.cell
+def _():
     return
 
 

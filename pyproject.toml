@@ -11,6 +11,7 @@ dependencies = [
     "anywidget>=0.9.21",
     "json5>=0.12.1",
     "marimo>=0.23.3",
+    "matplotlib>=3.10.0",
     "mohtml>=0.1.11",
     "numpy>=2.2.6",
     "pandas>=2.3.3",
@@ -37,4 +38,4 @@ dev = [
 
 [tool.taskipy.tasks]
 mkdocs = """ mkdir -p page/docs/examples && rm -rf page/docs/examples/* && cp -R notebook/__marimo__/* page/docs/examples/ && mkdocs build -v -f page/mkdocs.yml"""
-pdoc = """rm -rf docs/marimo-lib && pdoc marimo_lib.util marimo_lib.analysis --output-directory docs/marimo-lib --math --docformat google"""
+pdoc = """rm -rf docs/marimo-lib && pdoc marimo_lib.util marimo_lib.analysis marimo_lib.converter --output-directory docs/marimo-lib --math --docformat google"""

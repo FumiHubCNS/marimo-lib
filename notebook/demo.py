@@ -12,7 +12,7 @@
 
 import marimo
 
-__generated_with = "0.23.10"
+__generated_with = "0.23.9"
 app = marimo.App(
     width="medium",
     layout_file="layouts/demo.slides.json",
@@ -22,6 +22,7 @@ app = marimo.App(
 with app.setup:
     # Initialization code that runs before all other cells
     import marimo_lib.util as molib
+    import marimo_lib.converter as conv
     from plotly.subplots import make_subplots
     import random
     import numpy as np
@@ -175,7 +176,7 @@ def _(GLOBAL_FIG_WIDTH: int, mo, x_2d, y_2d):
             - `histo_skip`で`numpy.histogram2d(...)`をスキップするかを選択可能。
             """
         ),
-        _fig.update_layout(height=500, width=GLOBAL_FIG_WIDTH, showlegend=True, title_text="Slice data")
+        _fig.update_layout(height=500, width=GLOBAL_FIG_WIDTH, showlegend=True, title_text="Slice data"),
     ])
     return
 
